@@ -26,3 +26,6 @@ def var_name():
 # @defines_strategy
 def tvm_var(dtype=dtype()):
     return tvm.var(var_name(), dtype)
+
+def positive_integers(max_value=None):
+    return integers(min_value=1, max_value=max_value)
