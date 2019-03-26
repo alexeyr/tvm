@@ -968,6 +968,49 @@ def _logical(name):
         return AttrCvt(op_name=name)(inputs, attr)
     return _impl
 
+def _space_to_batch_nd():
+    def _impl(inputs, attr, params):
+        input_node = inputs[0]
+        input_shape = attr['_input_shapes'][input_node]
+        block_shape = params.pop(inputs[1].name_hint).asnumpy().tolist()
+        paddings = params.pop(inputs[2].name_hint).asnumpy().tolist()
+        N = len(input_shape)
+        M = len(block_shape)
+        batch = input_shape[0]
+        remaining_shape_length = N - M - 1
+        paddings = [(0, 0)] + paddings + [(0, 0)] * remaining_shape_length
+        # From https://www.tensorflow.org/api_docs/cc/class/tensorflow/ops/space-to-batch-n-d:
+
+        # Zero-pad the start and end of dimensions [1, ..., M] of the input according to paddings
+        # to produce padded of shape padded_shape.
+        padded = tvm.relay.nn.pad(input_node, pad_width=paddings)
+
+        # Reshape padded to reshaped_padded of shape:
+        # [batch] + [padded_shape[1] / block_shape[0], block_shape[0], ...,
+        # padded_shape[M] / block_shape[M-1], block_shape[M-1]] + remaining_shape
+        shape1 = [batch] + [item for i in range(M) for item in [-4, -1, block_shape[i]]] + [-2]
+        reshaped_padded = tvm.relay.reshape(padded, newshape=shape1)
+
+        # Permute dimensions of reshaped_padded to produce permuted_reshaped_padded of shape:
+        # block_shape + [batch] + [padded_shape[1] / block_shape[0], ...,
+        # padded_shape[M] / block_shape[M-1]] + remaining_shape
+        axes = [2 * i + 2 for i in range(M)] + [0] + [2 * i + 1 for i in range(M)] + \
+               list(range(1 + 2 * M, 1 + 2 * M + remaining_shape_length))
+        permuted_reshaped_padded = tvm.relay.transpose(reshaped_padded, axes=axes)
+        permuted_reshaped_padded_shape = _infer_out_shapes(permuted_reshaped_padded, params)[0]
+
+        # Reshape permuted_reshaped_padded to flatten block_shape into the batch dimension,
+        # producing an output tensor of shape:
+        # [batch * prod(block_shape)] + [padded_shape[1] / block_shape[0], ...,
+        # padded_shape[M] / block_shape[M-1]] + remaining_shape
+        shape2 = [batch * np.prod(block_shape)] + list(permuted_reshaped_padded_shape)[M + 1:]
+        reshaped_permuted_reshaped_padded = tvm.relay.reshape(permuted_reshaped_padded,
+                                                              newshape=shape2)
+
+        return reshaped_permuted_reshaped_padded
+    return _impl
+
+
 # compatible operators that do NOT require any conversion.
 _identity_list = []
 
@@ -1044,6 +1087,7 @@ _convert_map = {
     'Split'                             : _split(False),
     'SplitV'                            : _split(True),
     'Unpack'                            : _unpack(),
+    'SpaceToBatchND'                    : _space_to_batch_nd(),
 }
 
 def _LSTMBlockCell():

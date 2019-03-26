@@ -205,6 +205,19 @@ def test_forward_pooling():
                          dilation_rate=[1, 1],
                          strides=[2, 1])
 
+            # Tests involving SpaceToBatchND
+            _test_pooling(input_shape=[1, 1, 2, 1],
+                         window_shape=[1, 1],
+                         padding='VALID',
+                         pooling_type=pool_type,
+                         dilation_rate=[1, 2])
+
+            _test_pooling(input_shape=[1, 2, 1],
+                         window_shape=[1],
+                         padding='VALID',
+                         pooling_type=pool_type,
+                         dilation_rate=[2])
+
 #######################################################################
 # Convolution
 # -----------
@@ -213,12 +226,8 @@ def _test_convolution(tensor_in_sizes, filter_in_sizes,
                       dilations, strides, padding, data_format):
     """ One iteration of convolution with given shapes and attributes """
 
-    total_size_1 = 1
-    total_size_2 = 1
-    for s in tensor_in_sizes:
-        total_size_1 *= s
-    for s in filter_in_sizes:
-        total_size_2 *= s
+    total_size_1 = np.prod(tensor_in_sizes)
+    total_size_2 = np.prod(filter_in_sizes)
     # Initializes the input tensor with array containing incrementing
     # numbers from 1.
     data_array = [f * 1.0 for f in range(1, total_size_1 + 1)]
@@ -237,6 +246,7 @@ def _test_convolution(tensor_in_sizes, filter_in_sizes,
         nn_ops.conv2d(in_data,
                       in_filter,
                       strides=strides,
+                      dilations=dilations,
                       padding=padding,
                       data_format=data_format)
 
