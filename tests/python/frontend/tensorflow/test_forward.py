@@ -55,31 +55,23 @@ def run_tvm_graph(graph_def, input_data, input_node, num_output=1, target='llvm'
     layout = None
     if target == "cuda":
         layout = "NCHW"
-    target_host = 'llvm'
+    target_host = None
 
-    if isinstance(input_data, list):
-        shape_dict = {}
-        dtype_dict = {}
-        for i, e in enumerate(input_node):
-            shape_dict[e] = input_data[i].shape
-            dtype_dict[e] = input_data[i].dtype
-    else:
-        shape_dict = {input_node: input_data.shape}
-        dtype_dict = {input_node: input_data.dtype}
+    shape_dict = {e: i.shape for e, i in zip(input_node, input_data)}
 
     sym, params = relay.frontend.from_tensorflow(graph_def,
                                                  layout=layout,
                                                  shape=shape_dict,
                                                  outputs=out_names)
     with relay.build_config(opt_level=3):
-        graph, lib, params = relay.build(sym, target, params=params)
+        graph, lib, params = relay.build(sym, target, target_host, params=params)
 
     ctx = tvm.context(target, 0)
     from tvm.contrib import graph_runtime
     m = graph_runtime.create(graph, lib, ctx)
     # set inputs
-    for i, e in enumerate(input_node):
-        m.set_input(e, tvm.nd.array(input_data[i].astype(input_data[i].dtype)))
+    for e, i in zip(input_node, input_data):
+        m.set_input(e, tvm.nd.array(i.astype(i.dtype)))
 
     m.set_input(**params)
     # execute
@@ -113,17 +105,15 @@ def run_tf_graph(sess, input_data, input_node, output_node):
 
 def compare_tf_with_tvm(in_data, in_name, out_name, init_global_variables=False, no_gpu=False):
     """Generic function to generate and compare tensorflow and TVM output"""
+    def name_without_num(name):
+        return name.split(':')[0] if ":" in name else name
 
     out_name = convert_to_list(out_name)
-    out_node = [0]*len(out_name)
-    for i in range(len(out_name)):
-        out_node[i] = out_name[i].split(':')[0] if ":" in out_name[i] else out_name[i]
+    out_node = [name_without_num(name) for name in out_name]
 
     in_data = convert_to_list(in_data)
     in_name = convert_to_list(in_name)
-    in_node = [0]*len(in_name)
-    for i in range(len(in_name)):
-        in_node[i] = in_name[i].split(':')[0] if ":" in in_name[i] else in_name[i]
+    in_node = [name_without_num(name) for name in in_name]
     with tf.Session() as sess:
         if init_global_variables:
             sess.run(variables.global_variables_initializer())
