@@ -51,7 +51,7 @@ def test_reduce_prims():
             # launch the kernel.
             n = 1028
             m = 129
-            x = tvm.nd.array(np.random.uniform(size=(n, m)).astype(A.dtype), ctx)
+            x = tvm.nd.array(tvm.testing.random_data(shape=(n, m), dtype=A.dtype), ctx)
             y = tvm.nd.array(np.zeros(n, dtype=B.dtype), ctx)
             freduce(x, y)
             npy = y.asnumpy()
@@ -90,7 +90,7 @@ def test_rfactor():
                          name="mysum")
         # launch the kernel.
         n = 1027
-        a = tvm.nd.array(np.random.uniform(size=(n,)).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=A.dtype), ctx)
         b  = tvm.nd.array(np.zeros(1, dtype=B.dtype), ctx)
         fsum(a, b)
         res = np.sum(a.asnumpy(), axis=0)
@@ -120,7 +120,7 @@ def test_rfactor_factor_axis():
                          name="mysum")
         # launch the kernel.
         n = 1027
-        a = tvm.nd.array(np.random.uniform(size=(n,)).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=A.dtype), ctx)
         b  = tvm.nd.array(np.zeros(1, dtype=B.dtype), ctx)
         fsum(a, b)
         res = np.sum(a.asnumpy(), axis=0)
@@ -166,7 +166,7 @@ def test_rfactor_threads():
         # launch the kernel.
         n = nn
         m = mm
-        a = tvm.nd.array(np.random.uniform(size=(m, n)).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=(m, n), dtype=A.dtype), ctx)
         b  = tvm.nd.array(np.zeros(m, dtype=B.dtype), ctx)
         fsum(a, b)
         res = np.sum(a.asnumpy(), axis=1)
@@ -218,7 +218,7 @@ def test_rfactor_elemwise_threads():
                          target=device,
                          name="mysum")
         # launch the kernel.
-        a = tvm.nd.array(np.random.uniform(size=(m, n)).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=(m, n), dtype=A.dtype), ctx)
         b  = tvm.nd.array(np.zeros(m, dtype=B.dtype), ctx)
         fsum(a, b)
         res = np.sum(a.asnumpy(), axis=1) + 2
@@ -264,7 +264,7 @@ def test_argmax():
         mm = 12
         nn = 16
         np_idx = np.repeat(np.arange(nn, dtype='int32').reshape(1, nn), mm, axis=0)
-        np_val = np.random.uniform(size=(mm, nn)).astype('float32')
+        np_val = tvm.testing.random_data(shape=(mm, nn), dtype='float32')
         np_res = np.argmax(np_val, axis=1)
 
         nd_idx  = tvm.nd.array(np_idx, ctx)
@@ -324,7 +324,7 @@ def test_rfactor_argmax():
                             name="argmax")
 
         np_idx = np.repeat(np.arange(nn, dtype='int32').reshape(1, nn), mm, axis=0)
-        np_val = np.random.uniform(size=(mm, nn)).astype('float32')
+        np_val = tvm.testing.random_data(shape=(mm, nn), dtype='float32')
         np_res = np.argmax(np_val, axis=1)
 
         nd_idx  = tvm.nd.array(np_idx, ctx)

@@ -427,7 +427,7 @@ def check_function(symbol, forward=None, backward=None, grad_input_vars=None,
                 low = in_range[0]
                 high = in_range[1]
 
-        np_inputs[x_name] = np.random.uniform(size=x_shape, low=low, high=high).astype(x_dtype)
+        np_inputs[x_name] = tvm.testing.random_data(x_shape, x_dtype, low, high)
 
     np_inputs_without_head_grads = {k: np_inputs[k] for k in np_inputs
                                     if not k.startswith('head_grads_')}

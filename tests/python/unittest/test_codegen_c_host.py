@@ -36,8 +36,8 @@ def test_add():
         ctx = tvm.cpu(0)
         # launch the kernel.
         n = nn
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=n).astype(B.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype), ctx)
         c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
         fadd(a, b, c)
         tvm.testing.assert_allclose(
@@ -85,8 +85,8 @@ def test_add_pipeline():
         ctx = tvm.cpu(0)
         # launch the kernel.
         n = nn
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=n).astype(B.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype), ctx)
         c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
         fadd(a, b, c)
         tvm.testing.assert_allclose(

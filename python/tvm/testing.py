@@ -161,3 +161,38 @@ def check_numerical_grads(function, input_values, grad_values, function_value=No
         logging.info("Numerical grad test wrt '%s' of shape %s passes, "
                      "dist = %f, max_diff = %f, avg_diff = %f",
                      x_name, grad.shape, dist, max_diff, avg_diff)
+
+def random_data(shape, dtype, low=-5, high=5):
+    """ A version of np.random.uniform which takes dtype as a parameter directly
+    and avoids 0-only results for integer arrays with default limits.
+
+    Parameters
+    ----------
+    shape: int or tuple of ints or None
+        The output shape (None for a scalar)
+
+    dtype: str or dtype
+        The output type
+
+    low: float, optional
+        Inclusive lower boundary of the output interval. The default is 0 for
+        unsigned integer types and -5 for other number types.
+
+    high: float, optional
+        Exclusive upper boundary of the output interval. The default is 5.
+
+    Returns
+    -------
+    out : ndarray or scalar
+        Drawn samples from the parameterized uniform distribution.
+    """
+    dtype = np.dtype(dtype)
+    if dtype == np.bool_:
+        return np.random.choice([False, True], shape).astype(dtype)
+
+    if dtype.kind == 'f':
+        return np.random.uniform(low, high, shape).astype(dtype)
+
+    if dtype.kind == 'u':
+        low = max(low, 0)
+    return np.random.randint(low, high, shape, dtype)

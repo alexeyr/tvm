@@ -50,7 +50,7 @@ def test_unary_identity():
         assert yy.checked_type == relay.TensorType(shape, "float32")
 
         if ref is not None:
-            data = np.random.rand(*shape).astype('float32')
+            data = tvm.testing.random_data(shape, 'float32')
             intrp = create_executor()
             op_res = intrp.evaluate(y, { x: relay.const(data) })
             ref_res = ref(data)
@@ -75,7 +75,7 @@ def test_clip():
     yy = relay.ir_pass.infer_type(y)
     assert yy.checked_type == relay.TensorType((10, 4), "float32")
 
-    data = np.random.rand(10, 4).astype('float32')
+    data = tvm.testing.random_data(shape=(10, 4), dtype='float32')
     intrp = create_executor()
     op_res = intrp.evaluate(y, { a: relay.const(data) })
     ref_res = np.clip(data, 1., 4.)
@@ -89,7 +89,7 @@ def test_squeeze():
 
         np_axis = tuple(axis) if axis is not None else None
 
-        data = np.random.random_sample(shape).astype(dtype)
+        data = tvm.testing.random_data(shape, dtype)
         intrp = create_executor()
         op_res = intrp.evaluate(squeeze, { x : relay.const(data) })
         ref_res = np.squeeze(data, axis=np_axis)
@@ -122,7 +122,7 @@ def test_transpose():
         z = relay.transpose(x, axes=axes)
 
         func = relay.Function([x], z)
-        x_data = np.random.uniform(low=-1, high=1, size=dshape).astype("float32")
+        x_data = tvm.testing.random_data(dshape, "float32", -1, 1)
         ref_res = np.transpose(x_data, axes=axes)
 
         for target, ctx in ctx_list():
@@ -177,7 +177,7 @@ def test_reshape():
         assert zz.checked_type == relay.ty.TensorType(oshape, "float32")
 
         func = relay.Function([x], z)
-        x_data = np.random.uniform(low=-1, high=1, size=shape).astype("float32")
+        x_data = tvm.testing.random_data(shape, 'float32', -1, 1)
         ref_res = np.reshape(x_data, oshape)
         for target, ctx in ctx_list():
             for kind in ["graph", "debug"]:
@@ -219,8 +219,8 @@ def test_reshape_like_infer_type():
 
 def test_reshape_like():
     def verify_reshape_like(shape, oshape):
-        x_data = np.random.uniform(low=-1, high=1, size=shape).astype("float32")
-        y_data = np.random.uniform(low=-1, high=1, size=oshape).astype("float32")
+        x_data = tvm.testing.random_data(shape, 'float32', -1, 1)
+        y_data = tvm.testing.random_data(oshape, 'float32', -1, 1)
         ref_res = np.reshape(x_data, y_data.shape)
 
         x = relay.var("x", relay.TensorType(shape, "float32"))
@@ -268,7 +268,7 @@ def test_take():
         z = relay.take(x, indices, axis=axis, mode=mode)
 
         func = relay.Function([x, indices], z)
-        x_data = np.random.uniform(low=-1, high=1, size=src_shape).astype(src_dtype)
+        x_data = tvm.testing.random_data(src_shape, src_dtype, -1, 1)
         ref_res = np.take(x_data, indices=indices_src, axis=axis, mode=mode)
 
         for target, ctx in ctx_list():
@@ -388,7 +388,7 @@ def test_full_like_infer_type():
 
 def test_full_like():
     def verify_full_like(base, fill_value, dtype):
-        x_data = np.random.uniform(low=-1, high=1, size=base).astype(dtype)
+        x_data = tvm.testing.random_data(base, dtype, -1, 1)
         x = relay.var("x", relay.TensorType(base, dtype))
         y = relay.var("y", relay.scalar_type(dtype))
         z = relay.full_like(x, y)
@@ -421,7 +421,7 @@ def test_infer_type_leaky_relu():
     yy = relay.ir_pass.infer_type(z)
     assert yy.checked_type == relay.TensorType(shape, dtype)
     func = relay.Function([x], z)
-    x_data = np.random.uniform(low=-1, high=1, size=shape).astype(dtype)
+    x_data = tvm.testing.random_data(shape, dtype, -1, 1)
     ref_res = np.where(x_data > 0, x_data, x_data * 0.1)
 
     for target, ctx in ctx_list():
@@ -452,8 +452,8 @@ def verify_infer_type_prelu(data, alpha, axis, output, dtype="float32"):
         return
 
     func = relay.Function([x, y], z)
-    x_data = np.random.uniform(low=-1, high=1, size=data).astype(dtype)
-    a_data = np.random.uniform(low=-1, high=1, size=alpha).astype(dtype)
+    x_data = tvm.testing.random_data(data, dtype, -1, 1)
+    a_data = tvm.testing.random_data(alpha, dtype, -1, 1)
 
     if axis == 1:
         ref_res = (x_data < 0) * (x_data * a_data.reshape(3, 1, 1)) + (x_data>=0) * x_data
@@ -519,7 +519,7 @@ def test_tile():
         z = relay.tile(x, reps=reps)
 
         func = relay.Function([x], z)
-        x_data = np.random.uniform(low=-1, high=1, size=dshape).astype("float32")
+        x_data = tvm.testing.random_data(dshape, "float32", -1, 1)
         ref_res = np.tile(x_data, reps=reps)
 
         for target, ctx in ctx_list():
@@ -535,7 +535,7 @@ def test_repeat():
     def verify_repeat(dshape, repeats, axis):
         x = relay.Var("x", relay.TensorType(dshape, "float32"))
         func = relay.Function([x], relay.repeat(x, repeats, axis))
-        data = np.random.uniform(size=dshape).astype("float32")
+        data = tvm.testing.random_data(dshape, 'float32')
         ref_res = np.repeat(data, repeats, axis)
         for target, ctx in ctx_list():
             for kind in ["graph", "debug"]:
@@ -555,7 +555,7 @@ def test_stack():
         z = relay.stack(x, axis=axis)
 
         func = relay.Function(y, z)
-        x_data = [np.random.normal(size=shape).astype("float32") for shape in dshapes]
+        x_data = [tvm.testing.random_data(shape, 'float32') for shape in dshapes]
         ref_res = np.stack(x_data, axis=axis)
 
         for target, ctx in ctx_list():
@@ -576,7 +576,7 @@ def test_reverse():
         zz = relay.ir_pass.infer_type(z)
 
         func = relay.Function([x], z)
-        x_data = np.random.uniform(low=-1, high=1, size=dshape).astype("float32")
+        x_data = tvm.testing.random_data(dshape, "float32", -1, 1)
         ref_res = np.flip(x_data, axis)
         for target, ctx in ctx_list():
             for kind in ["graph", "debug"]:
@@ -595,7 +595,7 @@ def test_gather_nd():
         z = relay.gather_nd(x, y)
 
         func = relay.Function([x, y], z)
-        x_data = np.random.uniform(size=xshape).astype("float32")
+        x_data = tvm.testing.random_data(xshape, 'float32')
         ref_res = x_data[y_data]
 
         for target, ctx in ctx_list():

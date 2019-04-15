@@ -62,8 +62,8 @@ def test_conv2d_hwcn_map():
     s1 = topi.cuda.schedule_conv2d_hwcn([B])
     s2 = topi.cuda.schedule_conv2d_hwcn([C])
 
-    a_np = np.random.uniform(size=get_const_tuple(A.shape)).astype(A.dtype)
-    w_np = np.random.uniform(size=get_const_tuple(W.shape)).astype(W.dtype)
+    a_np = tvm.testing.random_data(get_const_tuple(A.shape), A.dtype)
+    w_np = tvm.testing.random_data(get_const_tuple(W.shape), W.dtype)
     b_np = topi.testing.conv2d_hwcn_python(a_np, w_np, stride, padding)
     c_np = np.maximum(b_np, 0)
 

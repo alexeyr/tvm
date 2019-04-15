@@ -14,11 +14,12 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import tvm
 from tvm import relay
 import numpy as np
 
 def _get_positive_scale(size):
-    return np.random.uniform(0.5, 1, size=size).astype('float32')
+    return tvm.testing.random_data(size, 'float32', 0.5, 1.0)
 
 
 def test_fold_fwd_simple():
@@ -501,7 +502,8 @@ def test_fold_bwd_relu_fail():
 
     out_scale = relay.var("in_scale", shape=(4, 1, 1))
     check((4, 4, 10, 10), 4, out_scale)
-    out_scale = relay.const(np.random.uniform(size=(4, 1, 1), low=-1.0, high=0.0)).astype("float32")
+    out_scale = relay.const(tvm.testing.random_data(shape=(4, 1, 1), dtype='float32',
+                                                    low=-1.0, high=0.0))
     check((4, 4, 10, 10), 4, out_scale)
 
 

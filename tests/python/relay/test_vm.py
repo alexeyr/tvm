@@ -45,21 +45,21 @@ def test_split():
     z = relay.concatenate([relay.TupleGetItem(y, 0)], axis=0)
     f = relay.Function([x], z)
 
-    x_data = np.random.rand(12,).astype('float32')
+    x_data = tvm.testing.random_data(12, 'float32')
     res = veval(f, x_data)
     tvm.testing.assert_allclose(res.asnumpy(), np.split(x_data, 3, axis=0)[0])
 
 def test_id():
     x = relay.var('x', shape=(10, 10))
     f = relay.Function([x], x)
-    x_data = np.random.rand(10, 10).astype('float64')
+    x_data = tvm.testing.random_data((10, 10), 'float64')
     res = veval(f, x_data)
     tvm.testing.assert_allclose(res.asnumpy(), x_data)
 
 def test_op():
     x = relay.var('x', shape=(10, 10))
     f = relay.Function([x], x + x)
-    x_data = np.random.rand(10, 10).astype('float32')
+    x_data = tvm.testing.random_data((10, 10), 'float32')
     res = veval(f, x_data)
     tvm.testing.assert_allclose(res.asnumpy(), x_data + x_data)
 
@@ -72,8 +72,8 @@ def test_cond():
     y = relay.var('x', shape=(10, 10))
     # f = relay.Function([x, y], relay.op.equal(x, y))
     f = relay.Function([x, y], any(relay.op.equal(x, y)))
-    x_data = np.random.rand(10, 10).astype('float32')
-    y_data = np.random.rand(10, 10).astype('float32')
+    x_data = tvm.testing.random_data((10, 10), 'float32')
+    y_data = tvm.testing.random_data((10, 10), 'float32')
 
     # same
     res = veval(f, x_data, x_data)
@@ -89,8 +89,8 @@ def test_simple_if():
     y = relay.var('y', shape=(10, 10))
     f = relay.Function([x, y],
         relay.If(any(relay.op.equal(x, y)), x, y))
-    x_data = np.random.rand(10, 10).astype('float32')
-    y_data = np.random.rand(10, 10).astype('float32')
+    x_data = tvm.testing.random_data((10, 10), 'float32')
+    y_data = tvm.testing.random_data((10, 10), 'float32')
 
     # same
     res = veval(f, x_data, x_data)
@@ -160,8 +160,8 @@ def test_tuple_fst():
     ttype = relay.TupleType([relay.TensorType((1,)), relay.TensorType((10,))])
     tup = relay.var('tup', type_annotation=ttype)
     f = relay.Function([tup], relay.TupleGetItem(tup, 0))
-    i_data = np.random.rand(41).astype('float32')
-    j_data = np.random.rand(10).astype('float32')
+    i_data = tvm.testing.random_data(41, 'float32')
+    j_data = tvm.testing.random_data(10, 'float32')
     result = veval(f, (i_data, j_data))
     tvm.testing.assert_allclose(result.asnumpy(), i_data)
 
@@ -169,8 +169,8 @@ def test_tuple_second():
     ttype = relay.TupleType([relay.TensorType((1,)), relay.TensorType((10,))])
     tup = relay.var('tup', type_annotation=ttype)
     f = relay.Function([tup], relay.TupleGetItem(tup, 1))
-    i_data = np.random.rand(41).astype('float32')
-    j_data = np.random.rand(10).astype('float32')
+    i_data = tvm.testing.random_data(41, 'float32')
+    j_data = tvm.testing.random_data(10, 'float32')
     result = veval(f, (i_data, j_data))
     tvm.testing.assert_allclose(result.asnumpy(), j_data)
 
@@ -218,7 +218,7 @@ def test_let_tensor():
 
     f = relay.Function([x], body)
 
-    x_data = np.random.rand(*shape).astype('float32')
+    x_data = tvm.testing.random_data(shape, 'float32')
     result = veval(f, x_data)
     tvm.testing.assert_allclose(result.asnumpy(), x_data + 42.0)
 
@@ -233,7 +233,7 @@ def test_let_scalar():
 
     f = relay.Function([x], body)
 
-    x_data = np.array(np.random.rand()).astype('float32')
+    x_data = tvm.testing.random_data(1, 'float32')
     result = veval(f, x_data)
     tvm.testing.assert_allclose(result.asnumpy(), x_data + 42.0)
 

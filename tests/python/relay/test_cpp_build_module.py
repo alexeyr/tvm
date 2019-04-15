@@ -32,9 +32,9 @@ def test_basic_build():
     y = relay.nn.relu(x)
     z = y + c
     func = relay.Function([a, b, c], z)
-    A = tvm.nd.array(np.random.uniform(-1, 1, (16, 8)).astype("float32"), ctx=ctx)
-    B = tvm.nd.array(np.random.uniform(-1, 1, (8, 8)).astype("float32"), ctx=ctx)
-    C = tvm.nd.array(np.random.uniform(-1, 1, (16, 8)).astype("float32"), ctx=ctx)
+    A = tvm.nd.array(tvm.testing.random_data((16, 8), "float32", -1, 1), ctx=ctx)
+    B = tvm.nd.array(tvm.testing.random_data((8, 8), "float32", -1, 1), ctx=ctx)
+    C = tvm.nd.array(tvm.testing.random_data((16, 8), "float32", -1, 1), ctx=ctx)
     params = {
         "b" : B,
         "c" : C
@@ -74,8 +74,8 @@ def test_fp16_build():
     y = relay.var("y", dtype=dtype, shape=(4, 4))
     z = x + y
     func = relay.Function([x, y], z)
-    X = tvm.nd.array(np.random.uniform(-1, 1, (4, 4)).astype(dtype), ctx=ctx)
-    Y = tvm.nd.array(np.random.uniform(-1, 1, (4, 4)).astype(dtype), ctx=ctx)
+    X = tvm.nd.array(tvm.testing.random_data((4, 4), dtype, -1, 1), ctx=ctx)
+    Y = tvm.nd.array(tvm.testing.random_data((4, 4), dtype, -1, 1), ctx=ctx)
     params = {
         "x": X,
         "y": Y,
@@ -111,7 +111,7 @@ def test_fp16_conversion():
             func = relay.Function([x], y)
 
             # init input
-            X = tvm.nd.array(n * np.random.randn(n).astype(src) - n / 2)
+            X = tvm.nd.array(tvm.testing.random_data(n, src, -n / 2, n / 2))
 
             # build
             with relay.build_config(opt_level=1):

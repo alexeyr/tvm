@@ -35,8 +35,8 @@ def test_collapse_sum_like():
     assert zz.checked_type == relay.ty.TensorType(shape_like, dtype)
 
     func = relay.Function([x, y], z)
-    x = np.random.uniform(size=shape).astype(dtype)
-    y = np.random.uniform(size=shape_like).astype(dtype)
+    x = tvm.testing.random_data(shape, dtype)
+    y = tvm.testing.random_data(shape_like, dtype)
     ref_res = np.sum(x, 0)
     for target, ctx in ctx_list():
         for kind in ["graph", "debug"]:
@@ -54,7 +54,7 @@ def test_broadcast_to():
     assert zz.checked_type == relay.ty.TensorType(shape_like, dtype)
 
     func = relay.Function([x], z)
-    x = np.random.uniform(size=shape).astype(dtype)
+    x = tvm.testing.random_data(shape, dtype)
     ref_res = np.broadcast_to(x, shape_like)
     for target, ctx in ctx_list():
         for kind in ["graph", "debug"]:
@@ -73,8 +73,8 @@ def test_broadcast_to_like():
     assert zz.checked_type == relay.ty.TensorType(shape_like, dtype)
 
     func = relay.Function([x, y], z)
-    x = np.random.uniform(size=shape).astype(dtype)
-    y = np.random.uniform(size=shape_like).astype(dtype)
+    x = tvm.testing.random_data(shape, dtype)
+    y = tvm.testing.random_data(shape_like, dtype)
     ref_res = np.broadcast_to(x, shape_like)
     for target, ctx in ctx_list():
         for kind in ["graph", "debug"]:
@@ -116,8 +116,8 @@ def verify_slice_like(data, slice_like, axes, output, dtype="float32"):
         return
 
     func = relay.Function([x, y], z)
-    x_data = np.random.uniform(size=data).astype(dtype)
-    y_data = np.random.uniform(size=slice_like).astype(dtype)
+    x_data = tvm.testing.random_data(data, dtype)
+    y_data = tvm.testing.random_data(slice_like, dtype)
     ref_res = np_slice_like(x_data, y_data, axes)
 
     for target, ctx in ctx_list():
@@ -149,7 +149,7 @@ def test_reverse_reshape():
         assert zz.checked_type == relay.ty.TensorType(oshape, "float32")
 
         func = relay.Function([x], z)
-        x_data = np.random.uniform(low=-1, high=1, size=shape).astype("float32")
+        x_data = tvm.testing.random_data(shape, 'float32', -1, 1)
         ref_res = np.reshape(x_data, oshape)
         for target, ctx in ctx_list():
             for kind in ["graph", "debug"]:
@@ -170,8 +170,8 @@ def verify_batch_matmul(x_shape, y_shape, out_shape, dtype="float32"):
     assert zz.checked_type == relay.ty.TensorType(out_shape, dtype)
 
     func = relay.Function([x, y], z)
-    x_np = np.random.uniform(size=x_shape).astype(dtype)
-    y_np = np.random.uniform(size=y_shape).astype(dtype)
+    x_np = tvm.testing.random_data(x_shape, dtype)
+    y_np = tvm.testing.random_data(y_shape, dtype)
     z_np = topi.testing.batch_matmul(x_np, y_np)
 
     for target, ctx in ctx_list():
@@ -198,7 +198,7 @@ def test_shape_of():
     x = relay.var("x", shape=shape)
     func = relay.Function([x], relay.op.shape_of(x))
     func = relay.ir_pass.infer_type(func)
-    x_data = np.random.rand(*shape).astype('float32')
+    x_data = tvm.testing.random_data(shape, 'float32')
     for target, ctx in ctx_list():
         # Because using graph executor, this op will be optimized after
         # constant folding pass, here we only test with interpreter
@@ -215,7 +215,7 @@ def verify_adaptive_pool2d(dshape, out_size, pool_type, layout="NCHW", dtype="fl
     def end_index(index, odim, idim):
         return int(np.ceil((index + 1) * idim / odim))
 
-    np_data = np.random.uniform(low=0, high=255, size=dshape).astype(dtype)
+    np_data = tvm.testing.random_data(dshape, dtype, 0, 255)
     n, c, h, w = dshape
     oh, ow = out_size
     oshape = (n, c) + out_size

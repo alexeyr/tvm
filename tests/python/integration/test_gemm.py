@@ -93,8 +93,8 @@ def test_gemm():
         n = nn
         m = n
         l = n
-        a_np = np.random.uniform(size=(n, l)).astype(A.dtype)
-        b_np = np.random.uniform(size=(m, l)).astype(B.dtype)
+        a_np = tvm.testing.random_data(shape=(n, l), dtype=A.dtype)
+        b_np = tvm.testing.random_data(shape=(m, l), dtype=B.dtype)
         a = tvm.nd.array(a_np, ctx)
         b = tvm.nd.array(b_np, ctx)
         c = tvm.nd.array(np.zeros((n, m), dtype=C.dtype), ctx)

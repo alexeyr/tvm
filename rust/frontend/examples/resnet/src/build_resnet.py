@@ -113,7 +113,7 @@ def test_build(build_dir):
     graph = open(osp.join(build_dir, "deploy_graph.json")).read()
     lib = tvm.module.load(osp.join(build_dir, "deploy_lib.so"))
     params = bytearray(open(osp.join(build_dir,"deploy_param.params"), "rb").read())
-    input_data = tvm.nd.array(np.random.uniform(size=data_shape).astype("float32"))
+    input_data = tvm.nd.array(tvm.testing.random_data(data_shape, 'float32'))
     ctx = tvm.cpu()
     module = graph_runtime.create(graph, lib, ctx)
     module.load_params(params)

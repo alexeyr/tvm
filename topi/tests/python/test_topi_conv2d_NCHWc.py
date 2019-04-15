@@ -76,9 +76,9 @@ def verify_conv2d_NCHWc(batch, in_channel, in_size, num_filter, kernel, stride,
 
     @memoize("topi.tests.test_topi_conv2d_NCHWc.verify_conv2d_NCHWc")
     def get_ref_data():
-        a_np = np.random.uniform(size=(batch, in_channel, in_height, in_width)).astype(dtype)
-        w_np = np.random.uniform(size=(num_filter, in_channel, kernel, kernel)).astype(dtype)
-        b_np = np.random.uniform(size=(num_filter, 1, 1)).astype(dtype)
+        a_np = tvm.testing.random_data((batch, in_channel, in_height, in_width), dtype)
+        w_np = tvm.testing.random_data((num_filter, in_channel, kernel, kernel), dtype)
+        b_np = tvm.testing.random_data((num_filter, 1, 1), dtype)
         c_np = topi.testing.conv2d_nchw_python(a_np, w_np, stride, padding)
         if add_bias:
             c_np += b_np

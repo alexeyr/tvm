@@ -191,7 +191,7 @@ def tune_and_evaluate(tuning_opt):
 
         # upload parameters to device
         ctx = tvm.cpu()
-        data_tvm = tvm.nd.array((np.random.uniform(size=data_shape)).astype(dtype))
+        data_tvm = tvm.nd.array(tvm.testing.random_data(data_shape, dtype))
         module = runtime.create(graph, lib, ctx)
         module.set_input('data', data_tvm)
         module.set_input(**params)

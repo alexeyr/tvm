@@ -74,7 +74,7 @@ def verify_reduce_map_ele(in_shape, axis, keepdims, type="sum", dtype="float32")
 
         foo = tvm.build(s, [A, B], device, name=type)
         # Test
-        in_npy = np.random.uniform(size=in_shape).astype(dtype)
+        in_npy = tvm.testing.random_data(in_shape, dtype)
         in_npy_map = np.sqrt(np.exp(in_npy)).astype(dtype)
         if type == "sum":
             out_npy = in_npy_map.sum(axis=axis, keepdims=keepdims)

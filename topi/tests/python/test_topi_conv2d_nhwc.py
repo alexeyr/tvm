@@ -37,8 +37,8 @@ def verify_conv2d_nhwc(batch, in_channel, in_size, num_filter, kernel, stride, p
 
     @memoize("topi.tests.test_topi_conv2d_nhwc.verify_nhwc.v2")
     def get_ref_data():
-        a_np = np.random.uniform(size=a_shape).astype(dtype)
-        w_np = np.random.uniform(size=w_shape).astype(dtype)
+        a_np = tvm.testing.random_data(a_shape, dtype)
+        w_np = tvm.testing.random_data(w_shape, dtype)
         dw_np = topi.testing.dilate_python(w_np, (dilation, dilation, 1, 1))
         b_np = topi.testing.conv2d_nhwc_python(a_np, dw_np, stride, padding)
         return a_np, w_np, b_np

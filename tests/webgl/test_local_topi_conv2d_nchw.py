@@ -38,8 +38,8 @@ def verify_conv2d_nchw(batch, in_channel, in_size, num_filter, kernel, stride, p
 
     @memoize("topi.tests.test_topi_conv2d.verify_con2d_nchw")
     def get_ref_data():
-        a_np = np.random.uniform(size=a_shape).astype(dtype)
-        w_np = np.random.uniform(size=w_shape).astype(dtype)
+        a_np = tvm.testing.random_data(a_shape, dtype)
+        w_np = tvm.testing.random_data(w_shape, dtype)
         b_np = topi.testing.conv2d_nchw_python(a_np, w_np, stride, padding)
         c_np = np.maximum(b_np, 0)
         return a_np, w_np, b_np, c_np

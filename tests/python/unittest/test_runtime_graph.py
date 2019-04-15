@@ -56,7 +56,7 @@ def test_graph_simple():
             return
         mlib = tvm.build(s, [A, B], "llvm", name="myadd")
         mod = graph_runtime.create(graph, mlib, tvm.cpu(0))
-        a = np.random.uniform(size=(n,)).astype(A.dtype)
+        a = tvm.testing.random_data(shape=n, dtype=A.dtype)
         mod.run(x=a)
         out = mod.get_output(0, tvm.nd.empty((n,)))
         np.testing.assert_equal(out.asnumpy(), a + 1)
@@ -75,7 +75,7 @@ def test_graph_simple():
         remote.upload(path_dso)
         mlib = remote.load_module("dev_lib.so")
         mod = graph_runtime.create(graph, mlib, remote.cpu(0))
-        a = np.random.uniform(size=(n,)).astype(A.dtype)
+        a = tvm.testing.random_data(shape=n, dtype=A.dtype)
         mod.run(x=tvm.nd.array(a, ctx))
         out = tvm.nd.empty((n,), ctx=ctx)
         out = mod.get_output(0, out)

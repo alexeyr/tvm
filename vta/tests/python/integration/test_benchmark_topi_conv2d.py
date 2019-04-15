@@ -69,8 +69,8 @@ def test_cpu_conv2d():
 
         @memoize("vta.tests.test_benchmark_topi.conv2d.cpu.verify_nhwc")
         def get_ref_data():
-            a_np = (np.random.uniform(size=a_shape) * 4).astype(data_dtype)
-            w_np = (np.random.uniform(size=w_shape) * 4).astype(kernel_dtype)
+            a_np = tvm.testing.random_data(a_shape, data_dtype, 0, 4)
+            w_np = tvm.testing.random_data(w_shape, kernel_dtype, 0, 4)
             a_np = np.abs(a_np)
             w_np = np.abs(w_np)
             b_np = topi.testing.conv2d_nchw_python(
@@ -185,8 +185,8 @@ def test_vta_conv2d():
 
         @memoize("vta.tests.test_benchmark_topi.conv2d.verify_nhwc")
         def get_ref_data():
-            a_np = (np.random.uniform(size=a_shape) * 4).astype(data_dtype)
-            w_np = (np.random.uniform(size=w_shape) * 4).astype(kernel_dtype)
+            a_np = tvm.testing.random_data(a_shape, data_dtype, 0, 4)
+            w_np = tvm.testing.random_data(w_shape, kernel_dtype, 0, 4)
             a_np = np.abs(a_np)
             w_np = np.abs(w_np)
             b_np = topi.testing.conv2d_nchw_python(
@@ -205,7 +205,7 @@ def test_vta_conv2d():
             ctx = remote.ext_dev(0)
             # Data in original format
             data_orig, kernel_orig, res_ref = get_ref_data()
-            bias_orig = (np.random.uniform(size=(wl.out_filter,)) * 4).astype("int32")
+            bias_orig = tvm.testing.random_data(wl.out_filter, 'int32', 0, 4)
             bias_orig = np.abs(bias_orig)
 
             data_packed = data_orig.reshape(

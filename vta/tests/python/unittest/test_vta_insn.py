@@ -64,7 +64,7 @@ def test_save_load_out():
         # verify
         ctx = remote.ext_dev(0)
         x_np = np.random.randint(
-            1, 10, size=(n, n, env.BATCH, env.BLOCK_OUT)).astype(x.dtype)
+            1, 10, size=(n, n, env.BATCH, env.BLOCK_OUT), dtype=x.dtype)
         y_np = x_np.astype(y.dtype)
         x_nd = tvm.nd.array(x_np, ctx)
         y_nd = tvm.nd.empty(y_np.shape, ctx=ctx, dtype=y_np.dtype)
@@ -116,7 +116,7 @@ def test_padded_load():
         # verify
         ctx = remote.ext_dev(0)
         x_np = np.random.randint(1, 2, size=(
-            n, m, env.BATCH, env.BLOCK_OUT)).astype(x.dtype)
+            n, m, env.BATCH, env.BLOCK_OUT), dtype=x.dtype)
         y_np = np.zeros((n + pad_before[0] + pad_after[0],
                          m + pad_before[1] + pad_after[1],
                          env.BATCH,
@@ -181,10 +181,10 @@ def test_gemm():
             # verify
             ctx = remote.ext_dev(0)
             x_np = np.random.randint(
-                -128, 128, size=(o, n, env.BATCH, env.BLOCK_IN)).astype(x.dtype)
+                -128, 128, size=(o, n, env.BATCH, env.BLOCK_IN), dtype=x.dtype)
             w_np = np.random.randint(
-                -128, 128, size=(m, n, env.BLOCK_OUT, env.BLOCK_IN)).astype(w.dtype)
-            y_np = np.zeros((o, m, env.BATCH, env.BLOCK_OUT)).astype(y.dtype)
+                -128, 128, size=(m, n, env.BLOCK_OUT, env.BLOCK_IN), dtype=w.dtype)
+            y_np = np.zeros((o, m, env.BATCH, env.BLOCK_OUT), dtype=y.dtype)
             x_nd = tvm.nd.array(x_np, ctx)
             w_nd = tvm.nd.array(w_np, ctx)
             y_nd = tvm.nd.array(y_np, ctx)
@@ -340,12 +340,12 @@ def test_alu():
             # verify
             ctx = remote.ext_dev(0)
             a_np = np.random.randint(
-                -16, 16, size=(m, n, env.BATCH, env.BLOCK_OUT)).astype(a.dtype)
+                -16, 16, size=(m, n, env.BATCH, env.BLOCK_OUT), dtype=a.dtype)
             if use_imm:
                 res_np = np_op(a_np, imm) if np_op else tvm_op(a_np, imm)
             else:
                 b_np = np.random.randint(
-                    -16, 16, size=(m, n, env.BATCH, env.BLOCK_OUT)).astype(b.dtype)
+                    -16, 16, size=(m, n, env.BATCH, env.BLOCK_OUT), dtype=b.dtype)
                 res_np = np_op(a_np, b_np) if np_op else tvm_op(a_np, b_np)
             res_np = res_np.astype(res.dtype)
             a_nd = tvm.nd.array(a_np, ctx)
@@ -415,7 +415,7 @@ def test_relu():
         # verify
         ctx = remote.ext_dev(0)
         a_np = np.random.randint(
-            -256, 256, size=(m, n, env.BATCH, env.BLOCK_OUT)).astype(a.dtype)
+            -256, 256, size=(m, n, env.BATCH, env.BLOCK_OUT), dtype=a.dtype)
         res_np = np.clip(a_np, 0, (1<<(env.INP_WIDTH-1))-1).astype(res.dtype)
         a_nd = tvm.nd.array(a_np, ctx)
         res_nd = tvm.nd.array(
@@ -473,12 +473,11 @@ def test_shift_and_scale():
         # verify
         ctx = remote.ext_dev(0)
         a_np = np.random.randint(
-            -10, 10, size=(m, n, env.BATCH, env.BLOCK_OUT)).astype(a.dtype)
-        res_np = np.right_shift((a_np + imm_shift), imm_scale)
-        res_np = res_np.astype(res.dtype)
+            -10, 10, size=(m, n, env.BATCH, env.BLOCK_OUT), dtype=a.dtype)
+        res_np = np.right_shift((a_np + imm_shift), imm_scale).astype(res.dtype)
         a_nd = tvm.nd.array(a_np, ctx)
         res_nd = tvm.nd.array(
-            np.zeros((m, n, env.BATCH, env.BLOCK_OUT)).astype(res.dtype), ctx)
+            np.zeros((m, n, env.BATCH, env.BLOCK_OUT), dtype=res.dtype), ctx)
         f(a_nd, res_nd)
         np.testing.assert_equal(res_np, res_nd.asnumpy())
 
@@ -490,7 +489,7 @@ def test_runtime_array():
         n = 100
         ctx = remote.ext_dev(0)
         x_np = np.random.randint(
-            1, 10, size=(n, n, env.BATCH, env.BLOCK_OUT)).astype("int8")
+            1, 10, size=(n, n, env.BATCH, env.BLOCK_OUT), dtype="int8")
         x_nd = tvm.nd.array(x_np, ctx)
         np.testing.assert_equal(x_np, x_nd.asnumpy())
 

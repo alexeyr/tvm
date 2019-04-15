@@ -333,9 +333,9 @@ ctx = remote.ext_dev(0)
 
 # Initialize the data and weight arrays randomly in the int range of (-128, 128]
 data_np = np.random.randint(
-    -128, 128, size=(batch_size, in_channels)).astype(data.dtype)
+    -128, 128, size=(batch_size, in_channels), dtype=data.dtype)
 weight_np = np.random.randint(
-    -128, 128, size=(out_channels, in_channels)).astype(weight.dtype)
+    -128, 128, size=(out_channels, in_channels), dtype=weight.dtype)
 
 # Apply packing to the data and weight arrays from a 2D to a 4D packed layout
 data_packed = data_np.reshape(batch_size // env.BATCH,

@@ -59,7 +59,7 @@ def test_add_pipeline():
         ctx = tvm.context(target, 0)
         # launch the kernel.
         n = nn
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
         c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
         f(a, c)
         tvm.testing.assert_allclose(c.asnumpy(), a.asnumpy() + 1)
@@ -92,7 +92,7 @@ def test_pack_buffer_simple():
         ctx = tvm.cpu(0)
         # launch the kernel.
         n = nn
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
         c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
 
         f(a, c)
@@ -122,7 +122,7 @@ def test_pack_buffer_intermediate():
         ctx = tvm.cpu(0)
         # launch the kernel.
         n = nn
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
         c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
 
         @tvm.register_func

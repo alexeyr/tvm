@@ -56,7 +56,7 @@ def benchmark_execution(net,
         return result.asnumpy().astype(dtype)
 
     # random input
-    data = np.random.uniform(size=data_shape).astype(dtype)
+    data = tvm.testing.random_data(data_shape, dtype)
     target = "llvm"
     ctx = tvm.cpu(0)
 

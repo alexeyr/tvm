@@ -50,8 +50,8 @@ def test_nhwc():
     out_channel = 8
     nchw_sym = get_sym("NCHW", "OIHW", out_channel)
     nhwc_sym = get_sym("NHWC", "HWIO", out_channel)
-    conv_weight = np.random.uniform(-1, 1, (out_channel, 3, 3, 3)).astype(np.float32)
-    conv_bias = np.random.uniform(-1, 1, (out_channel)).astype(np.float32)
+    conv_weight = tvm.testing.random_data((out_channel, 3, 3, 3), np.float32, -1, 1)
+    conv_bias = tvm.testing.random_data(out_channel, np.float32, -1, 1)
     nchw_params = {
         "conv2d0_weight" : tvm.nd.array(conv_weight, ctx=tvm.cpu(0)),
         "conv2d0_bias" : tvm.nd.array(conv_bias, ctx=tvm.cpu(0))
@@ -61,7 +61,7 @@ def test_nhwc():
         "conv2d1_bias" : tvm.nd.array(conv_bias, ctx=tvm.cpu(0))
     }
 
-    data = np.random.uniform(-1, 1, data_shape).astype(np.float32)
+    data = tvm.testing.random_data(data_shape, np.float32, -1, 1)
     oshape = (1, out_channel, 224, 224)
     oshape_nhwc = (1, 224, 224, out_channel)
     nchw_output = build_and_run(nchw_sym, nchw_params, data, oshape)

@@ -57,11 +57,11 @@ def test_broadcast_to(in_shape, out_shape):
     s = topi.cuda.schedule_broadcast(B)
     fcuda = tvm.build(s, [A, B], "cuda", name="broadcast_to")
 
-    data_npy = np.random.uniform(size=in_shape).astype(A.dtype)
+    data_npy = tvm.testing.random_data(in_shape, A.dtype)
     out_npy = np.broadcast_to(data_npy, out_shape)
 
     data_nd = tvm.nd.array(data_npy, tvm.gpu())
-    out_nd = tvm.nd.array(np.empty(out_shape).astype(B.dtype), tvm.gpu())
+    out_nd = tvm.nd.empty(out_shape, B.dtype, tvm.gpu())
     for _ in range(2):
         fcuda(data_nd, out_nd)
     tvm.testing.assert_allclose(out_nd.asnumpy(), out_npy)
@@ -91,8 +91,8 @@ def test_broadcast_binary_op(lhs_shape, rhs_shape, typ="add"):
     s = topi.cuda.schedule_broadcast(C)
     fcuda = tvm.build(s, [A, B, C], "cuda", name="broadcast_binary" + "_" + typ)
 
-    lhs_npy = np.random.uniform(size=lhs_shape).astype(A.dtype)
-    rhs_npy = np.random.uniform(size=rhs_shape).astype(A.dtype)
+    lhs_npy = tvm.testing.random_data(lhs_shape, A.dtype)
+    rhs_npy = tvm.testing.random_data(rhs_shape, A.dtype)
     if typ == "add":
         out_npy = lhs_npy + rhs_npy
     elif typ == "sub":

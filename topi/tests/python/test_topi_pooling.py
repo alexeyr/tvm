@@ -45,7 +45,7 @@ def verify_pool(n, ic, ih, kh, sh, padding, pool_type, ceil_mode, count_include_
         assert bshape[2] == int(math.floor(float(ashape[2] - kh + pt + pb) / sh) + 1)
         assert bshape[3] == int(math.floor(float(ashape[3] - kw + pl + pr) / sw) + 1)
 
-    a_np = np.random.uniform(low=0.001, size=(n, ic, ih, iw)).astype(dtype)
+    a_np = tvm.testing.random_data((n, ic, ih, iw), dtype, 0.001, 1.0)
     pad_np = np.zeros(shape=(n, ic, ih+pt+pb, iw+pl+pr)).astype(dtype)
     no_zero = (range(n), range(ic), (range(pt, ih+pt)), (range(pl, iw+pl)))
     pad_np[np.ix_(*no_zero)] = a_np
@@ -106,7 +106,7 @@ def verify_global_pool(n, c, h, w, pool_type):
     B = topi.nn.global_pool(A, pool_type=pool_type)
     B = topi.nn.relu(B)
 
-    a_np = np.random.uniform(size=get_const_tuple(A.shape)).astype(A.dtype)
+    a_np = tvm.testing.random_data(get_const_tuple(A.shape), A.dtype)
     if pool_type == 'avg':
         b_np = np.mean(a_np, axis=(2,3), keepdims=True)
     elif pool_type =='max':
@@ -143,7 +143,7 @@ def verify_adaptive_pool(dshape, out_size, pool_type, layout="NCHW", dtype="floa
     def end_index(index, odim, idim):
         return int(np.ceil((index + 1) * idim / odim))
 
-    np_data = np.random.uniform(low=0, high=255, size=dshape).astype(dtype)
+    np_data = tvm.testing.random_data(dshape, dtype, 0, 255)
     n, c, h, w = dshape
     oh, ow = out_size
     oshape = (n, c) + out_size

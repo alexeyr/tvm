@@ -40,7 +40,7 @@ def test_save_load():
 
 def test_ndarray_reflection():
     # Make two `NDArrayWrapper`s that point to the same underlying array.
-    np_array = np.random.uniform(size=(10, 2)).astype("float32")
+    np_array = tvm.testing.random_data(shape=(10, 2), dtype='float32')
     tvm_array = tvm.nd.array(np_array)
     param_dict = {'x': tvm_array, 'y': tvm_array}
     assert param_dict['x'].same_as(param_dict['y'])

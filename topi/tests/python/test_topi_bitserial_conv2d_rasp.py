@@ -26,7 +26,7 @@ def generate_quantized_np(shape, bits, out_dtype):
     np.random.seed(0)
     min_val = 0
     max_val = 1 << bits
-    return np.random.randint(min_val, max_val, size=shape).astype(out_dtype)
+    return np.random.randint(min_val, max_val, size=shape, dtype=out_dtype)
 
 # Verify that certain special instructions from the tensorize pass exist
 def verify_bitserial_conv2d_nhwc(batch, in_size, in_channel, num_filter, kernel, stride, padding,

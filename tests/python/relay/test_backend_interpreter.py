@@ -74,8 +74,8 @@ def test_mul_param():
     x = relay.var('x', shape=(10, 10))
     y = relay.var('y', shape=(1, 10))
     func = relay.Function([x, y], relay.multiply(x, y))
-    x_data = np.random.rand(10, 10).astype('float32')
-    y_data = np.random.rand(1, 10).astype('float32')
+    x_data = tvm.testing.random_data(shape=(10, 10), dtype='float32')
+    y_data = tvm.testing.random_data(shape=(11, 10), dtype='float32')
     check_eval(func, [x_data, y_data], x_data * y_data)
 
 
@@ -169,9 +169,9 @@ def test_kwargs_params():
     y = relay.var("y", shape=(1, 10))
     z = relay.var("z", shape=(1, 10))
     f = relay.Function([x, y, z], x + y + z)
-    x_data = np.random.rand(1, 10).astype('float32')
-    y_data = np.random.rand(1, 10).astype('float32')
-    z_data = np.random.rand(1, 10).astype('float32')
+    x_data = tvm.testing.random_data(shape=(11, 10), dtype='float32')
+    y_data = tvm.testing.random_data(shape=(11, 10), dtype='float32')
+    z_data = tvm.testing.random_data(shape=(11, 10), dtype='float32')
     params = { 'y': y_data, 'z': z_data }
     intrp = create_executor("debug")
     res = intrp.evaluate(f)(x_data, **params).data
@@ -185,13 +185,13 @@ def test_function_taking_adt_ref_tuple():
 
     nil_value = ConstructorValue(prelude.nil, [], [])
     cons_value = ConstructorValue(prelude.cons, [
-        TensorValue(np.random.rand(1, 10).astype('float32')),
+        TensorValue(tvm.testing.random_data((1, 10), 'float32')),
         nil_value
     ], [relay.TensorType((1, 10), 'float32')])
 
-    ref_value = RefValue(TensorValue(np.random.rand(1, 10).astype('float32')))
+    ref_value = RefValue(TensorValue(tvm.testing.random_data((1, 10), 'float32')))
     tuple_value = TupleValue(*[
-        TensorValue(np.random.rand(1, 10).astype('float32')) for _ in range(10)
+        TensorValue(tvm.testing.random_data((1, 10), 'float32')) for _ in range(10)
     ])
 
     id_func = intrp.evaluate(prelude.id)

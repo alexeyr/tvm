@@ -78,11 +78,11 @@ def depthwise_conv2d_with_workload_nchw(batch, in_channel, in_height, channel_mu
         # Use memoize, pickle the test data for next time use.
         @memoize("topi.tests.test_topi_depthwise_conv2d.nchw")
         def get_ref_data():
-            input_np = np.random.uniform(size=input_shape).astype(dtype)
-            filter_np = np.random.uniform(size=filter_shape).astype(dtype)
+            input_np = tvm.testing.random_data(input_shape, dtype)
+            filter_np = tvm.testing.random_data(filter_shape, dtype)
             dilated_filter_np = topi.testing.dilate_python(filter_np, (1, 1, dilation, dilation))
-            scale_np = np.random.uniform(size=scale_shape).astype(dtype)
-            shift_np = np.random.uniform(size=shift_shape).astype(dtype)
+            scale_np = tvm.testing.random_data(scale_shape, dtype)
+            shift_np = tvm.testing.random_data(shift_shape, dtype)
             # correctness with scipy
             depthwise_conv2d_scipy = topi.testing.depthwise_conv2d_python_nchw(
                 input_np, dilated_filter_np, stride, padding)
@@ -175,11 +175,11 @@ def depthwise_conv2d_with_workload_nhwc(batch, in_channel, in_height, channel_mu
         # Use memoize, pickle the test data for next time use.
         @memoize("topi.tests.test_topi_depthwise_conv2d.nhwc.v2")
         def get_ref_data():
-            input_np = np.random.uniform(size=input_shape).astype(dtype)
-            filter_np = np.random.uniform(size=filter_shape).astype(dtype)
+            input_np = tvm.testing.random_data(input_shape, dtype)
+            filter_np = tvm.testing.random_data(filter_shape, dtype)
             dilated_filter_np = topi.testing.dilate_python(filter_np, (dilation, dilation, 1, 1))
-            scale_np = np.random.uniform(size=scale_shape).astype(dtype)
-            shift_np = np.random.uniform(size=shift_shape).astype(dtype)
+            scale_np = tvm.testing.random_data(scale_shape, dtype)
+            shift_np = tvm.testing.random_data(shift_shape, dtype)
             # correctness with scipy
             depthwise_conv2d_scipy = topi.testing.depthwise_conv2d_python_nhwc(
                 input_np, dilated_filter_np, stride=[stride_h, stride_w], padding=padding)
@@ -298,8 +298,8 @@ def depthwise_conv2d_with_workload_NCHWc(batch, in_channel, in_height, channel_m
         # Use memoize, pickle the test data for next time use.
         @memoize("topi.tests.test_topi_depthwise_conv2d.NCHWc")
         def get_ref_data():
-            input_np = np.random.uniform(size=input_shape).astype(dtype)
-            filter_np = np.random.uniform(size=filter_shape).astype(dtype)
+            input_np = tvm.testing.random_data(input_shape, dtype)
+            filter_np = tvm.testing.random_data(filter_shape, dtype)
             # correctness with scipy
             depthwise_conv2d_scipy = topi.testing.depthwise_conv2d_python_nchw(
                 input_np, filter_np, stride, padding)

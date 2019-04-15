@@ -44,7 +44,7 @@ def test_exp():
         ctx = tvm.context(device, 0)
         # launch the kernel.
         n = 1024
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
         b = tvm.nd.array(np.zeros(n, dtype=B.dtype), ctx)
         fexp(a, b)
         tvm.testing.assert_allclose(
@@ -79,8 +79,8 @@ def test_fmod():
 
             # launch the kernel.
             n = 1024
-            a = tvm.nd.array((np.random.uniform(size=n) * 256).astype(A.dtype), ctx)
-            b = tvm.nd.array((np.random.uniform(size=n) * 256).astype(B.dtype), ctx)
+            a = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=A.dtype) * 256, ctx)
+            b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype) * 256, ctx)
             c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
             ftimer = fmod.time_evaluator(fmod.entry_name, ctx, number=1)
             tcost = ftimer(a, b, c).mean
@@ -126,8 +126,8 @@ def test_multiple_cache_write():
         ctx = tvm.context(device, 0)
         # launch the kernel.
         n = 1024
-        a0 = tvm.nd.array(np.random.uniform(size=n).astype(A0.dtype), ctx)
-        a1 = tvm.nd.array(np.random.uniform(size=n).astype(A1.dtype), ctx)
+        a0 = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=A0.dtype), ctx)
+        a1 = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=A1.dtype), ctx)
         c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
         func(a0, a1, c)
         tvm.testing.assert_allclose(
@@ -155,7 +155,7 @@ def test_log_pow_llvm():
     ctx = tvm.cpu(0)
     # launch the kernel.
     n = 1028
-    a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
+    a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
     b = tvm.nd.array(np.zeros(n, dtype=B.dtype), ctx)
     repeat = 10
     ftimer = flog.time_evaluator(flog.entry_name, ctx, number=1, repeat=repeat)
@@ -236,8 +236,8 @@ def test_add():
 
             # launch the kernel.
             n = 1024
-            a = tvm.nd.array((np.random.uniform(size=n) * 256).astype(A.dtype), ctx)
-            b = tvm.nd.array((np.random.uniform(size=n) * 256).astype(B.dtype), ctx)
+            a = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=A.dtype) * 256, ctx)
+            b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype) * 256, ctx)
             c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
             ftimer = fadd.time_evaluator(fadd.entry_name, ctx, number=1)
             tcost = ftimer(a, b, c).mean
@@ -285,7 +285,7 @@ def try_warp_memory():
             print("skip because %s is not enabled.." % device)
             return
         f = tvm.build(s, [A, B], device)
-        a = tvm.nd.array((np.random.uniform(size=m) * 256).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=m, dtype=A.dtype) * 256, ctx)
         b = tvm.nd.array(np.zeros(m, dtype=B.dtype), ctx)
         f(a, b)
         tvm.testing.assert_allclose(

@@ -42,8 +42,8 @@ def test_fully_connected_inference():
 
         ctx = tvm.cpu(0)
         f = tvm.build(s, [A, B, D, bias], target)
-        a = tvm.nd.array(np.random.uniform(size=(l)).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=(m, l)).astype(B.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=l, dtype=A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=(m, l), dtype=B.dtype), ctx)
         d = tvm.nd.array(np.zeros((m, ), dtype=D.dtype), ctx)
         bb = 10.0
         f(a, b, d, bb)
@@ -127,8 +127,8 @@ def test_convolution_inference():
 
         f = tvm.build(s, [data, kernel, bias, output], target)
 
-        na = np.random.uniform(size=dshape).astype(data.dtype)
-        nb = np.random.uniform(size=kshape).astype(kernel.dtype)
+        na = tvm.testing.random_data(dshape, data.dtype)
+        nb = tvm.testing.random_data(kshape, kernel.dtype)
         nc = np.zeros(bshape, dtype=bias.dtype)
         ta = tvm.nd.array(na, ctx)
         tb = tvm.nd.array(nb, ctx)
@@ -192,9 +192,9 @@ def test_convolution_inference_without_weight_transform():
 
         f = tvm.build(s, [data, kernel, bias, output], target)
 
-        na = np.random.uniform(size=dshape).astype(data.dtype)
-        nb = np.random.uniform(size=kshape).astype(kernel.dtype)
-        nc = np.random.uniform(size=bshape).astype(bias.dtype) if with_bias else np.zeros(bshape, dtype=bias.dtype)
+        na = tvm.testing.random_data(dshape, data.dtype)
+        nb = tvm.testing.random_data(kshape, kernel.dtype)
+        nc = tvm.testing.random_data(bshape, bias.dtype) if with_bias else np.zeros(bshape, dtype=bias.dtype)
         ta = tvm.nd.array(na, ctx)
         tb = tvm.nd.array(nb, ctx)
         tc = tvm.nd.array(nc, ctx)

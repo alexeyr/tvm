@@ -76,10 +76,10 @@ def test_depthwise_conv2d_nchw():
     s1 = schedule_depthwise_conv2d_nchw(DepthwiseConv2d)
     s2 = schedule_depthwise_conv2d_nchw(ScaleShift)
     s3 = schedule_depthwise_conv2d_nchw(Relu)
-    input_np = np.random.uniform(size=get_const_tuple(Input.shape)).astype(Input.dtype)
-    filter_np = np.random.uniform(size=get_const_tuple(Filter.shape)).astype(Filter.dtype)
-    scale_np = np.random.uniform(size=(in_channel * channel_multiplier)).astype(Scale.dtype)
-    shift_np = np.random.uniform(size=(in_channel * channel_multiplier)).astype(Shift.dtype)
+    input_np = tvm.testing.random_data(get_const_tuple(Input.shape), Input.dtype)
+    filter_np = tvm.testing.random_data(get_const_tuple(Filter.shape), Filter.dtype)
+    scale_np = tvm.testing.random_data(in_channel * channel_multiplier, Scale.dtype)
+    shift_np = tvm.testing.random_data(in_channel * channel_multiplier, Shift.dtype)
 
     def check_device(device):
         if not tvm.module.enabled(device):
@@ -166,10 +166,10 @@ def test_depthwise_conv2d_nhwc():
     s2 = schedule_depthwise_conv2d_nhwc(ScaleShift)
     s3 = schedule_depthwise_conv2d_nhwc(Relu)
 
-    input_np = np.random.uniform(size=get_const_tuple(Input.shape)).astype(Input.dtype)
-    filter_np = np.random.uniform(size=get_const_tuple(Filter.shape)).astype(Filter.dtype)
-    scale_np = np.random.uniform(size=(in_channel * channel_multiplier)).astype(Scale.dtype)
-    shift_np = np.random.uniform(size=(in_channel * channel_multiplier)).astype(Shift.dtype)
+    input_np = tvm.testing.random_data(get_const_tuple(Input.shape), Input.dtype)
+    filter_np = tvm.testing.random_data(get_const_tuple(Filter.shape), Filter.dtype)
+    scale_np = tvm.testing.random_data(in_channel * channel_multiplier, Scale.dtype)
+    shift_np = tvm.testing.random_data(in_channel * channel_multiplier, Shift.dtype)
 
     def check_device(device):
         if not tvm.module.enabled(device):

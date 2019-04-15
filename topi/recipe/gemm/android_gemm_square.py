@@ -36,8 +36,8 @@ def ngflops(N):
 
 dtype = 'float32'
 def evaluate(func, ctx, N, times):
-    a_np = np.random.uniform(size=(N, N)).astype(dtype)
-    b_np = np.random.uniform(size=(N, N)).astype(dtype)
+    a_np = tvm.testing.random_data((N, N), dtype)
+    b_np = tvm.testing.random_data((N, N), dtype)
     a = tvm.nd.array(a_np, ctx)
     b = tvm.nd.array(b_np, ctx)
     c = tvm.nd.array(np.zeros((N, N), dtype=dtype), ctx)

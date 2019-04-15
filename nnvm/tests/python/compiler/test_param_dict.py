@@ -26,8 +26,8 @@ from tvm.contrib import util, graph_runtime
 
 
 def test_save_load():
-    x = np.random.uniform(size=(10, 2)).astype("float32")
-    y = np.random.uniform(size=(1, 2, 3)).astype("float32")
+    x = tvm.testing.random_data((10, 2), np.float32)
+    y = tvm.testing.random_data((1, 2, 3), np.float32)
     x[:] = 1
     y[:] = 1
     params = {"x": x, "y": y}
@@ -40,7 +40,7 @@ def test_save_load():
 
 
 def test_ndarray_reflection():
-    x = np.random.uniform(size=(10, 2)).astype("float32")
+    x = tvm.testing.random_data((10, 2), np.float32)
     xx = tvm.nd.array(x)
     xnode = tvm.make.node("NDArrayWrapper", name="xx", array=xx)
     xnode2 = tvm.make.node("NDArrayWrapper", name="x2", array=xx)
@@ -75,7 +75,7 @@ def test_bigendian_rpc_param():
         lib.save(path_dso)
         remote.upload(path_dso)
         lib = remote.load_module("dev_lib.o")
-        a = np.random.randint(0, 256, size=shape).astype(dtype)
+        a = tvm.testing.random_data(shape, dtype, 0, 256)
         a[:] = 1
         params = {"x" : a}
         ctx = remote.cpu(0)

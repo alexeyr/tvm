@@ -44,8 +44,8 @@ def test_local_gemm():
 
     ctx = tvm.opengl()
     n, m, l = nn, nn, nn
-    a_np = np.random.uniform(low=0, high=10, size=(n, l)).astype(A.dtype)
-    b_np = np.random.uniform(low=0, high=10, size=(m, l)).astype(B.dtype)
+    a_np = tvm.testing.random_data((n, l), A.dtype, 0, 10)
+    b_np = tvm.testing.random_data((m, l), B.dtype, 0, 10)
     a = tvm.nd.array(a_np, ctx)
     b = tvm.nd.array(b_np, ctx)
     c = tvm.nd.array(np.zeros((n, m), dtype=C.dtype), ctx)

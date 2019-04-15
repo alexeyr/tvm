@@ -30,9 +30,9 @@ def test_conv2d():
         for target, ctx in ctx_list():
             graph, lib, _ = nnvm.compiler.build(sym, target, shape_dict)
             m = graph_runtime.create(graph, lib, ctx)
-            data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
-            kernel = tvm.nd.array(np.random.uniform(size=kshape).astype(dtype))
-            bias = tvm.nd.array(np.random.uniform(size=kshape[0]).astype(dtype))
+            data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
+            kernel = tvm.nd.array(tvm.testing.random_data(kshape, dtype))
+            bias = tvm.nd.array(tvm.testing.random_data(kshape[0], dtype))
             m.run(x=data, y_weight=kernel, y_bias=bias)
             out = m.get_output(0, tvm.nd.empty(oshape, dtype))
             c_np = topi.testing.conv2d_nchw_python(
@@ -80,8 +80,8 @@ def test_mixed_precision():
     for target, ctx in ctx_list():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict, dtype_dict)
         m = graph_runtime.create(graph, lib, ctx)
-        data = tvm.nd.array(np.random.uniform(-127, 127, size=dshape).astype(dtype))
-        kernel = tvm.nd.array(np.random.uniform(-127, 127, size=kshape).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype, -127, 127))
+        kernel = tvm.nd.array(tvm.testing.random_data(kshape, dtype, -127, 127))
         m.run(x=data, y_weight=kernel)
         out = m.get_output(0, tvm.nd.empty(oshape, out_dtype))
         c_np = topi.testing.conv2d_nchw_python(
@@ -103,9 +103,9 @@ def test_dilated_conv2d():
     for target, ctx in ctx_list():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict)
         m = graph_runtime.create(graph, lib, ctx)
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
-        bias = tvm.nd.array(np.random.uniform(size=kshape[0]).astype(dtype))
-        kernel_np = np.random.uniform(size=kshape).astype(dtype)
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
+        bias = tvm.nd.array(tvm.testing.random_data(kshape[0], dtype))
+        kernel_np = tvm.testing.random_data(kshape, dtype)
         kernel = tvm.nd.array(kernel_np)
         dkernel_np = topi.testing.dilate_python(kernel_np, (1, 1, dilation, dilation))
         m.run(x=data, y_weight=kernel, y_bias=bias)
@@ -128,9 +128,9 @@ def test_grouped_conv2d_nchw():
     for target, ctx in ctx_list():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict)
         m = graph_runtime.create(graph, lib, ctx)
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
-        kernel = tvm.nd.array(np.random.uniform(size=kshape).astype(dtype))
-        bias = tvm.nd.array(np.random.uniform(size=kshape[0]).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
+        kernel = tvm.nd.array(tvm.testing.random_data(kshape, dtype))
+        bias = tvm.nd.array(tvm.testing.random_data(kshape[0], dtype))
         m.run(x=data, y_weight=kernel, y_bias=bias)
         out = m.get_output(0, tvm.nd.empty(oshape, dtype))
         c_np = topi.testing.depthwise_conv2d_python_nchw(
@@ -150,9 +150,9 @@ def test_grouped_conv2d_nhwc():
     for target, ctx in ctx_list():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict)
         m = graph_runtime.create(graph, lib, ctx)
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
-        kernel = tvm.nd.array(np.random.uniform(size=kshape).astype(dtype))
-        bias = tvm.nd.array(np.random.uniform(size=kshape[2]).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
+        kernel = tvm.nd.array(tvm.testing.random_data(kshape, dtype))
+        bias = tvm.nd.array(tvm.testing.random_data(kshape[2], dtype))
         m.run(x=data, y_weight=kernel, y_bias=bias)
         out = m.get_output(0, tvm.nd.empty(oshape, dtype))
         c_np = topi.testing.depthwise_conv2d_python_nhwc(
@@ -173,9 +173,9 @@ def test_conv2d_transpose():
     for target, ctx in ctx_list():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict)
         m = graph_runtime.create(graph, lib, ctx)
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
-        kernel = tvm.nd.array(np.random.uniform(size=kshape).astype(dtype))
-        bias = tvm.nd.array(np.random.uniform(size=kshape[1]).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
+        kernel = tvm.nd.array(tvm.testing.random_data(kshape, dtype))
+        bias = tvm.nd.array(tvm.testing.random_data(kshape[1], dtype))
         m.run(x=data, y_weight=kernel, y_bias=bias)
         out = m.get_output(0, tvm.nd.empty(oshape, dtype))
         c_np = topi.testing.conv2d_transpose_nchw_python(
@@ -197,7 +197,7 @@ def test_max_pool2d():
     for target, ctx in ctx_list():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict)
         m = graph_runtime.create(graph, lib, ctx)
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
         m.run(x=data)
         out = m.get_output(0, tvm.nd.empty(oshape, dtype))
         b_np = np.max(data.asnumpy().reshape(1,3,14,2,14,2), axis=(3,5))
@@ -214,7 +214,7 @@ def test_avg_pool2d():
     for target, ctx in ctx_list():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict)
         m = graph_runtime.create(graph, lib, ctx)
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
         m.run(x=data)
         out = m.get_output(0, tvm.nd.empty(oshape, dtype))
         b_np = np.mean(data.asnumpy().reshape(1,3,14,2,14,2), axis=(3,5))
@@ -234,7 +234,7 @@ def test_avg_pool2d_no_count_pad():
     (ic, ih, iw) = (3, 28, 28)
     (oc, oh, ow) = (3, 15, 15)
 
-    a_np = np.random.uniform(low=0.001, size=(n, ic, ih, iw)).astype(dtype)
+    a_np = tvm.testing.random_data(shape=(n, ic, ih, iw), dtype=dtype, low=0.001, high=1.0)
     pad_np = np.zeros(shape=(n, ic, ih+2*ph, iw+2*pw)).astype(dtype)
     no_zero = (range(n), range(ic), (range(ph, ih+ph)), (range(pw, iw+pw)))
     pad_np[np.ix_(*no_zero)] = a_np
@@ -266,7 +266,7 @@ def test_global_max_pool2d():
     for target, ctx in ctx_list():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict)
         m = graph_runtime.create(graph, lib, ctx)
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
         m.run(x=data)
         out = m.get_output(0, tvm.nd.empty(oshape, dtype))
         b_np = np.max(data.asnumpy(), axis=(2,3), keepdims=True)
@@ -283,7 +283,7 @@ def test_global_avg_pool2d():
     for target, ctx in ctx_list():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict)
         m = graph_runtime.create(graph, lib, ctx)
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
         m.run(x=data)
         out = m.get_output(0, tvm.nd.empty(oshape, dtype))
         b_np = np.mean(data.asnumpy(), axis=(2,3), keepdims=True)
@@ -301,7 +301,7 @@ def test_upsampling_nearest_neighbor():
     for target, ctx in ctx_list():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict)
         m = graph_runtime.create(graph, lib, ctx)
-        a_np = np.random.uniform(size=dshape).astype(dtype)
+        a_np = tvm.testing.random_data(dshape, dtype)
         data = tvm.nd.array(a_np)
         m.run(x=data)
         out = m.get_output(0, tvm.nd.empty(oshape, dtype))
@@ -320,7 +320,7 @@ def test_upsampling_bilinear():
     for target, ctx in ctx_list():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict, dtype_dict)
         m = graph_runtime.create(graph, lib, ctx)
-        a_np = np.random.uniform(size=dshape).astype(dtype)
+        a_np = tvm.testing.random_data(dshape, dtype)
         data = tvm.nd.array(a_np)
         m.run(x=data)
         out = m.get_output(0, tvm.nd.empty(oshape, dtype))
@@ -338,7 +338,7 @@ def test_resize_bilinear():
     for target, ctx in ctx_list():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict, dtype_dict)
         m = graph_runtime.create(graph, lib, ctx)
-        a_np = np.random.uniform(size=dshape).astype(dtype)
+        a_np = tvm.testing.random_data(dshape, dtype)
         data = tvm.nd.array(a_np)
         m.run(x=data)
         out = m.get_output(0, tvm.nd.empty(oshape, dtype))

@@ -31,7 +31,7 @@ def verify_clip(N, a_min, a_max, dtype):
     # use memoize to pickle the test data for next time use
     @memoize("topi.tests.test_topi_clip")
     def get_ref_data():
-        a_np = np.random.uniform(a_min*2, a_max*2, size=(N, N)).astype(dtype)
+        a_np = tvm.testing.random_data(shape=(N, N), dtype=dtype, low=a_min*2, high=a_max*2)
         b_np = np.clip(a_np, a_min, a_max)
         return a_np, b_np
     a_np, b_np = get_ref_data()

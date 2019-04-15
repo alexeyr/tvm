@@ -34,7 +34,7 @@ import tempfile
 import numpy as np
 
 from ... import ir_pass, build, build_config, nd, TVMError, register_func, \
-    rpc as _rpc, target as _target
+    rpc as _rpc, target as _target, testing
 from ...contrib import nvcc, ndk, tar
 
 from ..util import get_const_tuple
@@ -219,7 +219,7 @@ class RPCRunner(Runner):
             # this option works for tuning topi, but might not work for you custom op
             with _target.create("llvm"):
                 s, arg_bufs = task.instantiate(task.config_space.get(0))
-            self.ref_input = [np.random.uniform(size=get_const_tuple(x.shape)).astype(x.dtype)
+            self.ref_input = [testing.random_data(get_const_tuple(x.shape), x.dtype)
                               for x in arg_bufs]
             func = build(s, arg_bufs, "llvm")
             tvm_buf = [nd.array(x) for x in self.ref_input]

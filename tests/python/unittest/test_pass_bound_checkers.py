@@ -56,8 +56,8 @@ def test_out_of_bounds_llvm(index_a, index_b):
     print (stmt)
     fadd = tvm.build (s, [A, B, C], tgt, target_host=tgt_host, name="myadd")
     ctx = tvm.context(tgt, 0)
-    a = tvm.nd.array(np.random.uniform(size=1024).astype(A.dtype), ctx)
-    b = tvm.nd.array(np.random.uniform(size=1024).astype(B.dtype), ctx)
+    a = tvm.nd.array(tvm.testing.random_data(shape=1024, dtype=A.dtype), ctx)
+    b = tvm.nd.array(tvm.testing.random_data(shape=1024, dtype=B.dtype), ctx)
     c = tvm.nd.array(np.zeros(1024, dtype=C.dtype), ctx)
     fadd (a, b, c)
 
@@ -73,8 +73,8 @@ def test_in_bounds_llvm():
     print (stmt)
     fadd = tvm.build (s, [A, B, C], tgt, target_host=tgt_host, name="myadd")
     ctx = tvm.context(tgt, 0)
-    a = tvm.nd.array(np.random.uniform(size=1024).astype(A.dtype), ctx)
-    b = tvm.nd.array(np.random.uniform(size=1024).astype(B.dtype), ctx)
+    a = tvm.nd.array(tvm.testing.random_data(shape=1024, dtype=A.dtype), ctx)
+    b = tvm.nd.array(tvm.testing.random_data(shape=1024, dtype=B.dtype), ctx)
     c = tvm.nd.array(np.zeros(1024, dtype=C.dtype), ctx)
     fadd (a, b, c)
 
@@ -95,8 +95,8 @@ def test_out_of_bounds_vectorize_llvm(nn, index_a, index_b):
     f = tvm.build(s, [a, b, c], tgt, target_host=tgt_host, name="myaddvec")
     ctx = tvm.cpu(0)
     n = nn
-    a = tvm.nd.array(np.random.uniform(size=(n)).astype(a.dtype), ctx)
-    b = tvm.nd.array(np.random.uniform(size=(n)).astype(a.dtype), ctx)
+    a = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=a.dtype), ctx)
+    b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=a.dtype), ctx)
     c = tvm.nd.array(np.zeros(n, dtype=c.dtype), ctx)
     f(a, b, c)
 
@@ -139,8 +139,8 @@ def test_in_bounds_loop_partition_basic_llvm():
     ctx = tvm.cpu(0)
 
     f = tvm.build(s, [A, B, T], "llvm")
-    a = tvm.nd.array(np.random.uniform(size=(32,)).astype(A.dtype), ctx)
-    b = tvm.nd.array(np.random.uniform(size=(32,)).astype(B.dtype), ctx)
+    a = tvm.nd.array(tvm.testing.random_data(shape=32, dtype=A.dtype), ctx)
+    b = tvm.nd.array(tvm.testing.random_data(shape=32, dtype=B.dtype), ctx)
     t = tvm.nd.empty((32,), T.dtype, ctx)
     f(a, b, t)
 
@@ -158,8 +158,8 @@ def test_out_of_bounds_loop_partition_basic_llvm(index_a, index_b):
     ctx = tvm.cpu(0)
 
     f = tvm.build(s, [A, B, T], "llvm")
-    a = tvm.nd.array(np.random.uniform(size=(32,)).astype(A.dtype), ctx)
-    b = tvm.nd.array(np.random.uniform(size=(32,)).astype(B.dtype), ctx)
+    a = tvm.nd.array(tvm.testing.random_data(shape=32, dtype=A.dtype), ctx)
+    b = tvm.nd.array(tvm.testing.random_data(shape=32, dtype=B.dtype), ctx)
     t = tvm.nd.empty((32,), T.dtype, ctx)
     f(a, b, t)
 
@@ -224,8 +224,8 @@ def test_in_bounds_const_loop_partition_llvm():
         ctx = tvm.cpu(0)
 
         f = tvm.build(s, [A, B, T], "llvm")
-        a = tvm.nd.array(np.random.uniform(size=(n,)).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=(n,)).astype(B.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype), ctx)
         t = tvm.nd.empty((n,), T.dtype, ctx)
         f(a, b, t)
 
@@ -244,8 +244,8 @@ def test_out_of_bounds_const_loop_partition_llvm(index_a, index_b):
         ctx = tvm.cpu(0)
 
         f = tvm.build(s, [A, B, T], "llvm")
-        a = tvm.nd.array(np.random.uniform(size=(n,)).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=(n,)).astype(B.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype), ctx)
         t = tvm.nd.empty((n,), T.dtype, ctx)
         f(a, b, t)
 
@@ -278,11 +278,11 @@ def test_in_bounds_conv_llvm(loop_tiling=False):
     ctx = tvm.cpu (0)
 
     f = tvm.build(s, [data, kernel, conv], "llvm")
-    data_input = tvm.nd.array(np.random.uniform(
-          size=(batch_size, in_channel, in_height, in_width)).astype(tvm.float32), ctx)
-    kernel_input = tvm.nd.array(np.random.uniform(
-          size=(kernel_height, kernel_width, in_channel, out_channel)).astype(tvm.float32), ctx)
-    conv_out = tvm.nd.empty ((batch_size, out_channel, out_height, out_width), tvm.float32, ctx)
+    data_input = tvm.nd.array(tvm.testing.random_data(
+          shape=(batch_size, in_channel, in_height, in_width), dtype=tvm.float32), ctx)
+    kernel_input = tvm.nd.array(tvm.testing.random_data(
+          shape=(kernel_height, kernel_width, in_channel, out_channel), dtype=tvm.float32), ctx)
+    conv_out = tvm.nd.empty((batch_size, out_channel, out_height, out_width), tvm.float32, ctx)
     f(data_input, kernel_input, conv_out)
 
 @raises(Exception)
@@ -322,10 +322,10 @@ def test_out_of_bounds_conv_llvm(data_offsets, kernel_offsets, loop_tiling=False
     ctx = tvm.cpu (0)
 
     f = tvm.build(s, [data, kernel, conv], "llvm")
-    data_input = tvm.nd.array(np.random.uniform(
-          size=(batch_size, in_channel, in_height, in_width)).astype(tvm.float32), ctx)
-    kernel_input = tvm.nd.array(np.random.uniform(
-          size=(kernel_height, kernel_width, in_channel, out_channel)).astype(tvm.float32), ctx)
+    data_input = tvm.nd.array(tvm.testing.random_data(
+          shape=(batch_size, in_channel, in_height, in_width), dtype=tvm.float32), ctx)
+    kernel_input = tvm.nd.array(tvm.testing.random_data(
+          shape=(kernel_height, kernel_width, in_channel, out_channel), dtype=tvm.float32), ctx)
     conv_out = tvm.nd.empty ((batch_size, out_channel, out_height, out_width), tvm.float32, ctx)
     f(data_input, kernel_input, conv_out)
 
@@ -343,8 +343,8 @@ def test_in_bounds_tensors_with_same_shapes1D_llvm():
     ctx = tvm.cpu(0)
 
     f = tvm.build(s, [A, B, T], "llvm")
-    a = tvm.nd.array(np.random.uniform(size=(32, )).astype(A.dtype), ctx)
-    b = tvm.nd.array(np.random.uniform(size=(32,)).astype(B.dtype), ctx)
+    a = tvm.nd.array(tvm.testing.random_data(shape=32, dtype=A.dtype), ctx)
+    b = tvm.nd.array(tvm.testing.random_data(shape=32, dtype=B.dtype), ctx)
     t = tvm.nd.empty((32,), T.dtype, ctx)
     f(a, b, t)
 
@@ -363,8 +363,8 @@ def test_out_of_bounds_tensors_with_diff_shapes1D_llvm(a_shape, b_shape, c_shape
     ctx = tvm.cpu(0)
 
     f = tvm.build(s, [A, B, T], "llvm")
-    a = tvm.nd.array(np.random.uniform(size=(a_shape,)).astype(A.dtype), ctx)
-    b = tvm.nd.array(np.random.uniform(size=(b_shape,)).astype(B.dtype), ctx)
+    a = tvm.nd.array(tvm.testing.random_data(a_shape, A.dtype), ctx)
+    b = tvm.nd.array(tvm.testing.random_data(b_shape, B.dtype), ctx)
     t = tvm.nd.empty((c_shape,), T.dtype, ctx)
     f(a, b, t)
 
@@ -382,8 +382,8 @@ def test_in_bounds_tensors_with_same_shapes2D_llvm():
     ctx = tvm.cpu(0)
 
     f = tvm.build(s, [A, B, T], "llvm")
-    a = tvm.nd.array(np.random.uniform(size=(32, 32)).astype(A.dtype), ctx)
-    b = tvm.nd.array(np.random.uniform(size=(32, 32)).astype(B.dtype), ctx)
+    a = tvm.nd.array(tvm.testing.random_data(shape=(32, 32), dtype=A.dtype), ctx)
+    b = tvm.nd.array(tvm.testing.random_data(shape=(32, 32), dtype=B.dtype), ctx)
     t = tvm.nd.empty((32, 32), T.dtype, ctx)
     f(a, b, t)
 
@@ -402,9 +402,9 @@ def test_out_of_bounds_tensors_with_diff_shapes2D_llvm(a_shape, b_shape, c_shape
     ctx = tvm.cpu(0)
 
     f = tvm.build(s, [A, B, T], "llvm")
-    a = tvm.nd.array(np.random.uniform(size=(a_shape[0],a_shape[1])).astype(A.dtype), ctx)
-    b = tvm.nd.array(np.random.uniform(size=(b_shape[0],b_shape[1])).astype(B.dtype), ctx)
-    t = tvm.nd.empty((c_shape[0],c_shape[1]), T.dtype, ctx)
+    a = tvm.nd.array(tvm.testing.random_data(shape=a_shape, dtype=A.dtype), ctx)
+    b = tvm.nd.array(tvm.testing.random_data(shape=b_shape, dtype=B.dtype), ctx)
+    t = tvm.nd.empty(c_shape, T.dtype, ctx)
     f(a, b, t)
 
 def test_in_bounds_tensors_with_same_shapes3D_llvm():
@@ -421,8 +421,8 @@ def test_in_bounds_tensors_with_same_shapes3D_llvm():
     ctx = tvm.cpu(0)
 
     f = tvm.build(s, [A, B, T], "llvm")
-    a = tvm.nd.array(np.random.uniform(size=(32,32,32)).astype(A.dtype), ctx)
-    b = tvm.nd.array(np.random.uniform(size=(32,32,32)).astype(B.dtype), ctx)
+    a = tvm.nd.array(tvm.testing.random_data(shape=(32,32,32), dtype=A.dtype), ctx)
+    b = tvm.nd.array(tvm.testing.random_data(shape=(32,32,32), dtype=B.dtype), ctx)
     t = tvm.nd.empty((32, 32, 32), T.dtype, ctx)
     f(a, b, t)
 
@@ -441,9 +441,9 @@ def test_out_of_bounds_tensors_with_diff_shapes3D_llvm(a_shape, b_shape, c_shape
     ctx = tvm.cpu(0)
 
     f = tvm.build(s, [A, B, T], "llvm")
-    a = tvm.nd.array(np.random.uniform(size=(a_shape[0],a_shape[1], c_shape[2])).astype(A.dtype), ctx)
-    b = tvm.nd.array(np.random.uniform(size=(b_shape[0],b_shape[1], b_shape[2])).astype(B.dtype), ctx)
-    t = tvm.nd.empty((c_shape[0],c_shape[1],c_shape[2]), T.dtype, ctx)
+    a = tvm.nd.array(tvm.testing.random_data(shape=a_shape, dtype=A.dtype), ctx)
+    b = tvm.nd.array(tvm.testing.random_data(shape=b_shape, dtype=B.dtype), ctx)
+    t = tvm.nd.empty(c_shape, T.dtype, ctx)
     f(a, b, t)
 
 @raises(Exception)
@@ -463,9 +463,9 @@ def test_out_of_bounds_tensors_with_zero_shape_op_with_not_zero_shape_llvm():
     f = tvm.build(s, [A, scale, D], "llvm")
     ctx = tvm.cpu(0)
     # launch the kernel.
-    a = tvm.nd.array(np.random.randint(0, 2, size=(n,)).astype(A.dtype), ctx)
+    a = tvm.nd.array(np.random.randint(0, 2, size=n, dtype=A.dtype), ctx)
     sc = tvm.nd.array(
-        np.random.randint(0, 2, size=()).astype(scale.dtype), ctx)
+        np.random.randint(0, 2, size=(), dtype=scale.dtype), ctx)
     d = tvm.nd.empty((), D.dtype, ctx)
     f(a, sc, d)
     d_np = np.sum(a.asnumpy()) * sc.asnumpy() + 1
@@ -548,10 +548,10 @@ if __name__ == "__main__":
         # tensors with diff shapes basic operation such as mul
         test_out_of_bounds_tensors_with_diff_shapes1D_llvm (32, 64, 64)
         test_out_of_bounds_tensors_with_diff_shapes1D_llvm (64, 32, 64)
-        test_out_of_bounds_tensors_with_diff_shapes2D_llvm([64, 64], [32, 32], [64, 64])
-        test_out_of_bounds_tensors_with_diff_shapes2D_llvm([32, 32], [64, 64], [64, 64])
-        test_out_of_bounds_tensors_with_diff_shapes3D_llvm([64, 64, 64], [32, 32, 32], [64, 64, 64])
-        test_out_of_bounds_tensors_with_diff_shapes3D_llvm([32, 32, 32], [64, 64, 64], [64, 64, 64])
+        test_out_of_bounds_tensors_with_diff_shapes2D_llvm((64, 64), (32, 32), (64, 64))
+        test_out_of_bounds_tensors_with_diff_shapes2D_llvm((32, 32), (64, 64), (64, 64))
+        test_out_of_bounds_tensors_with_diff_shapes3D_llvm((64, 64, 64), (32, 32, 32), (64, 64, 64))
+        test_out_of_bounds_tensors_with_diff_shapes3D_llvm((32, 32, 32), (64, 64, 64), (64, 64, 64))
         # check tensors with the same shapes
         test_in_bounds_tensors_with_same_shapes1D_llvm()
         test_in_bounds_tensors_with_same_shapes2D_llvm()

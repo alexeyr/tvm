@@ -35,7 +35,7 @@ def test_ewise_injective():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict)
         assert graph.index.num_nodes == 2
         m = graph_runtime.create(graph, lib, ctx)
-        x_np = np.random.uniform(size=dshape).astype(dtype)
+        x_np = tvm.testing.random_data(dshape, dtype)
         m.run(x=x_np)
         out = m.get_output(0, tvm.nd.empty((10, 6)))
         tvm.testing.assert_allclose(
@@ -60,9 +60,9 @@ def test_conv_ewise_injective():
         # print(graph.ir(join_entry_attrs=["shape"]))
         assert graph.index.num_nodes == 5
         # set input
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
-        kernel = tvm.nd.array(np.random.uniform(size=kshape).astype(dtype))
-        bias = tvm.nd.array(np.random.uniform(size=kshape[0]).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
+        kernel = tvm.nd.array(tvm.testing.random_data(kshape, dtype))
+        bias = tvm.nd.array(tvm.testing.random_data(kshape[0], dtype))
         m.run(x=data, y_weight=kernel, y_bias=bias)
         # get output
         out = m.get_output(0, tvm.nd.empty(oshape, dtype))
@@ -85,7 +85,7 @@ def test_injective_reduce_injective():
         graph, lib, _ = nnvm.compiler.build(y, target, shape_dict)
         m = graph_runtime.create(graph, lib, ctx)
         assert graph.index.num_nodes == 2
-        data = np.random.uniform(size=dshape).astype(dtype)
+        data = tvm.testing.random_data(dshape, dtype)
         m.run(x=data)
         c_np = np.sum(data.reshape(32, 18 * 18) + 1, axis=1)
         # get output
@@ -113,8 +113,8 @@ def test_injective_conv2d():
         # data, global_avg_pool, conv weight, conv op, fused elemwise add
         assert graph.index.num_nodes == 5
 
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
-        kernel = tvm.nd.array(np.random.uniform(size=kshape).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
+        kernel = tvm.nd.array(tvm.testing.random_data(kshape, dtype))
         m = graph_runtime.create(graph, lib, ctx)
         m.run(data=data, conv_weight=kernel)
         # get output
@@ -145,8 +145,8 @@ def test_concatenate_conv2d():
         # data, conv weight, conv op, concat
         assert graph.index.num_nodes == 4
 
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
-        kernel = tvm.nd.array(np.random.uniform(size=kshape).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
+        kernel = tvm.nd.array(tvm.testing.random_data(kshape, dtype))
         m = graph_runtime.create(graph, lib, ctx)
         m.run(data=data, conv_weight=kernel)
         # get output
@@ -182,9 +182,9 @@ def test_residual_block_layout_transform():
     # data, conv1 weight, conv1, layout transform + elemwise add + relu, conv2 weight, conv2 op
     assert graph.index.num_nodes == 6
 
-    data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
-    kernel1 = tvm.nd.array(np.random.uniform(size=kshape).astype(dtype))
-    kernel2 = tvm.nd.array(np.random.uniform(size=kshape).astype(dtype))
+    data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
+    kernel1 = tvm.nd.array(tvm.testing.random_data(kshape, dtype))
+    kernel2 = tvm.nd.array(tvm.testing.random_data(kshape, dtype))
     m = graph_runtime.create(graph, lib, ctx)
     m.run(data=data, conv1_weight=kernel1, conv2_weight=kernel2)
     out = m.get_output(0, tvm.nd.empty(oshape, dtype))
@@ -225,7 +225,7 @@ def test_fuse_conv2d_elu():
     size = 64
     dshape = (1, in_channel, size, size)
     oshape = (1, out_channel, size, size)
-    data = np.random.uniform(-1, 1, dshape).astype(np.float32)
+    data = tvm.testing.random_data(dshape, np.float32, -1, 1)
 
     for target, ctx in ctx_list():
         sym1 = get_sym(out_channel)

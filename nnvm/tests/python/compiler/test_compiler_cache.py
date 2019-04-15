@@ -30,8 +30,8 @@ def test_compile_cache():
     def verify(graph, lib):
         m = graph_runtime.create(graph, lib, tvm.cpu(0))
         # get member functions
-        na = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
-        nb = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
+        na = tvm.nd.array(tvm.testing.random_data(shape, dtype))
+        nb = tvm.nd.array(tvm.testing.random_data(shape, dtype))
         m.run(x=na, y=nb)
         # get outputs
         out = m.get_output(0, tvm.nd.empty(shape, dtype))

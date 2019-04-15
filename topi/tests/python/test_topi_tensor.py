@@ -23,17 +23,15 @@ from tvm.contrib.pickle_memoize import memoize
 def verify_elemwise_sum(num_args, dtype):
     shape = (3,5,4)
 
-    tvm_placeholders = []
-    for i in range(num_args):
-        tvm_placeholders.append(
-            tvm.placeholder(shape, name="data"+str(i), dtype=dtype))
+    tvm_placeholders = [tvm.placeholder(shape, name="data"+str(i), dtype=dtype)
+                        for i in range(num_args)]
     esum = topi.elemwise_sum(tvm_placeholders)
     s = tvm.create_schedule([esum.op])
 
     @memoize("topi.tests.test_topi_elemwise_sum")
     def get_ref_data():
-        np_nd = [np.random.uniform(0, 10, size=shape).astype(dtype)
-                 for i in range(num_args)]
+        np_nd = [tvm.testing.random_data(shape, dtype, 0, 10)
+                 for _ in range(num_args)]
         return np_nd
     np_nd = get_ref_data()
 

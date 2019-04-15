@@ -38,8 +38,8 @@ def with_tvm(lam, *args):
     return out_nd.asnumpy()
 
 def verify_matmul(sa, sb, transp_a, transp_b):
-    a = np.random.uniform(low=-1.0, high=1.0, size=sa).astype(np.float32)
-    b = np.random.uniform(low=-1.0, high=1.0, size=sb).astype(np.float32)
+    a = tvm.testing.random_data(sa, 'float32', -1.0, 1.0)
+    b = tvm.testing.random_data(sb, 'float32', -1.0, 1.0)
     c1 = np.matmul(np.transpose(a) if transp_a else a,
                    np.transpose(b) if transp_b else b)
     c2 = with_tvm(lambda A,B: topi.matmul(A,B,transp_a,transp_b), a,b)
@@ -56,8 +56,8 @@ def test_matmul():
     verify_matmul((3,5),(2,3),True,True)
 
 def verify_tensordot(sa, sb, axes):
-    a = np.random.uniform(low=-1.0, high=1.0, size=sa).astype(np.float32)
-    b = np.random.uniform(low=-1.0, high=1.0, size=sb).astype(np.float32)
+    a = tvm.testing.random_data(sa, 'float32', -1.0, 1.0)
+    b = tvm.testing.random_data(sb, 'float32', -1.0, 1.0)
     c1 = np.tensordot(a, b, axes)
     c2 = with_tvm(lambda A, B: topi.tensordot(A, B, axes), a, b)
     tvm.testing.assert_allclose(c1, c2, rtol=1e-5, atol=1e-5)

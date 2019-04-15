@@ -160,12 +160,9 @@ def test_simplex_data_transferring():
         ctx = [host_ctx, device_ctx]
         mod = graph_runtime.create(graph, mhost, ctx)
         params = {}
-        params["A"] = tensor_a = np.random.uniform(
-            size=shape).astype(tensor_a.dtype)
-        params["B"] = tensor_b = np.random.uniform(
-            size=shape).astype(tensor_b.dtype)
-        params["C"] = tensor_c = np.random.uniform(
-            size=shape).astype(tensor_c.dtype)
+        params["A"] = tensor_a = tvm.testing.random_data(shape, tensor_a.dtype)
+        params["B"] = tensor_b = tvm.testing.random_data(shape, tensor_b.dtype)
+        params["C"] = tensor_c = tvm.testing.random_data(shape, tensor_c.dtype)
         mod.set_input(**params)
         mod.run()
         out = mod.get_output(0, tvm.nd.empty(shape))
@@ -357,14 +354,10 @@ def test_duplex_data_transferring():
         mhost = tvm.build(target_flist, target_host=target_host)
         ctx = [host_ctx, device_ctx]
         params = {}
-        params["A"] = tensor_a = np.random.uniform(
-            size=shape).astype(tensor_a.dtype)
-        params["B"] = tensor_b = np.random.uniform(
-            size=shape).astype(tensor_b.dtype)
-        params["C"] = tensor_c = np.random.uniform(
-            size=shape).astype(tensor_c.dtype)
-        params["D"] = tensor_d = np.random.uniform(
-            size=shape).astype(tensor_d.dtype)
+        params["A"] = tensor_a = tvm.testing.random_data(shape, tensor_a.dtype)
+        params["B"] = tensor_b = tvm.testing.random_data(shape, tensor_b.dtype)
+        params["C"] = tensor_c = tvm.testing.random_data(shape, tensor_c.dtype)
+        params["D"] = tensor_d = tvm.testing.random_data(shape, tensor_d.dtype)
 
         def check_verify():
             mod = graph_runtime.create(graph, mhost, ctx)

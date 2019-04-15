@@ -34,7 +34,7 @@ def verify_expand_dims(in_shape, out_shape, axis, num_newaxis):
         with tvm.target.create(device):
             s = topi.generic.schedule_broadcast(B)
         foo = tvm.build(s, [A, B], device, name="expand_dims")
-        data_npy = np.random.uniform(size=in_shape).astype(A.dtype)
+        data_npy = tvm.testing.random_data(in_shape, A.dtype)
         out_npy = data_npy.reshape(out_shape)
         data_nd = tvm.nd.array(data_npy, ctx)
         out_nd = tvm.nd.array(np.empty(out_shape).astype(B.dtype), ctx)
@@ -80,7 +80,7 @@ def verify_reshape(src_shape, dst_shape):
         with tvm.target.create(device):
             s = topi.generic.schedule_injective(B)
         foo = tvm.build(s, [A, B], device, name="reshape")
-        data_npy = np.random.normal(size=src_shape).astype(A.dtype)
+        data_npy = tvm.testing.random_data(src_shape, A.dtype)
         out_npy = np.reshape(data_npy, newshape=dst_shape)
         data_nd = tvm.nd.array(data_npy, ctx)
         out_nd = tvm.nd.empty(dst_shape, ctx=ctx, dtype=B.dtype)
@@ -104,7 +104,7 @@ def verify_squeeze(src_shape, axis):
             s = topi.generic.schedule_injective(B)
 
         foo = tvm.build(s, [A, B], device, name="squeeze")
-        data_npy = np.random.normal(size=src_shape).astype(A.dtype)
+        data_npy = tvm.testing.random_data(src_shape, A.dtype)
         out_npy = np.squeeze(data_npy, axis=axis)
         data_nd = tvm.nd.array(data_npy, ctx)
         out_nd_shape = out_npy.shape
@@ -130,7 +130,7 @@ def verify_concatenate(shapes, axis):
             s = topi.generic.schedule_injective(out_tensor)
 
         foo = tvm.build(s, tensor_l + [out_tensor], device, name="concatenate")
-        data_npys = [np.random.normal(size=shape).astype(tensor_l[0].dtype) for shape in shapes]
+        data_npys = [tvm.testing.random_data(shape, tensor_l[0].dtype) for shape in shapes]
         out_npy = np.concatenate(data_npys, axis=axis)
         data_nds = [tvm.nd.array(data_npy, ctx) for data_npy in data_npys]
         out_nd = tvm.nd.empty(out_npy.shape, ctx=ctx, dtype=out_tensor.dtype)
@@ -155,7 +155,7 @@ def verify_stack(shapes, axis):
             s = topi.generic.schedule_broadcast(out_tensor)
 
         foo = tvm.build(s, tensor_l + [out_tensor], device, name="stack")
-        data_npys = [np.random.normal(size=shape).astype(tensor_l[0].dtype) for shape in shapes]
+        data_npys = [tvm.testing.random_data(shape, tensor_l[0].dtype) for shape in shapes]
         out_npy = np.stack(data_npys, axis=axis)
         data_nds = [tvm.nd.array(data_npy, ctx) for data_npy in data_npys]
         out_nd = tvm.nd.empty(out_npy.shape, ctx=ctx, dtype=out_tensor.dtype)
@@ -179,7 +179,7 @@ def verify_split(src_shape, indices_or_sections, axis):
             s = topi.generic.schedule_injective(tensor_l)
 
         foo = tvm.build(s, [A] + list(tensor_l), device, name="split")
-        data_npy = np.random.normal(size=src_shape).astype(A.dtype)
+        data_npy = tvm.testing.random_data(src_shape, A.dtype)
         out_npys = np.split(data_npy, indices_or_sections, axis=axis)
         data_nd = tvm.nd.array(data_npy, ctx)
         out_nds = [tvm.nd.empty(out_npy.shape, ctx=ctx, dtype=tensor_l[0].dtype) for out_npy in out_npys]
@@ -205,7 +205,7 @@ def verify_expand_like(in_shape, out_shape, axis):
 
         ctx = tvm.context(device, 0)
         f = tvm.build(s, [A, B, C], device, name="expand_like")
-        input = np.random.uniform(size=in_shape).astype(A.dtype)
+        input = tvm.testing.random_data(in_shape, A.dtype)
         tvm_input = tvm.nd.array(input, ctx)
 
         odim = len(out_shape)
@@ -238,7 +238,7 @@ def verify_flip(in_shape, axis):
             s = topi.generic.schedule_injective(B)
 
         foo = tvm.build(s, [A, B], device, name="reverse")
-        x_np = np.random.uniform(size=in_shape).astype(A.dtype)
+        x_np = tvm.testing.random_data(in_shape, A.dtype)
         out_npy = np.flip(x_np, axis) + 1
         data_nd = tvm.nd.array(x_np, ctx)
         out_nd = tvm.nd.empty(out_npy.shape, ctx=ctx, dtype=A.dtype)
@@ -302,7 +302,7 @@ def verify_strided_slice(in_shape, begin, end, strides=None):
             s = topi.generic.schedule_injective(B)
 
         foo = tvm.build(s, [A, B], device, name="stride_slice")
-        x_np = np.random.uniform(size=in_shape).astype(A.dtype)
+        x_np = tvm.testing.random_data(in_shape, A.dtype)
         out_npy = topi.testing.strided_slice_python(
             x_np, begin, end, strides) + 1
         data_nd = tvm.nd.array(x_np, ctx)
@@ -387,7 +387,7 @@ def verify_repeat(in_shape, repeats, axis):
         with tvm.target.create(device):
             s = topi.generic.schedule_broadcast(B)
         foo = tvm.build(s, [A, B], device, name="repeat")
-        data_npy = np.random.uniform(size=in_shape).astype(A.dtype)
+        data_npy = tvm.testing.random_data(in_shape, A.dtype)
         out_npy = np.repeat(data_npy, repeats, axis)
         data_nd = tvm.nd.array(data_npy, ctx)
         out_nd = tvm.nd.array(np.empty(out_npy.shape).astype(B.dtype), ctx)
@@ -409,7 +409,7 @@ def verify_tile(in_shape, reps):
         with tvm.target.create(device):
             s = topi.generic.schedule_broadcast(B)
         foo = tvm.build(s, [A, B], device, name="tile")
-        data_npy = np.random.uniform(size=in_shape).astype(A.dtype)
+        data_npy = tvm.testing.random_data(in_shape, A.dtype)
         out_npy = np.tile(data_npy, reps)
         data_nd = tvm.nd.array(data_npy, ctx)
         out_nd = tvm.nd.array(np.empty(out_npy.shape).astype(B.dtype), ctx)
@@ -563,7 +563,7 @@ def test_layout_transform():
     A = tvm.placeholder(shape=in_shape, dtype="float32", name="A")
     B = topi.layout_transform(A, "NCHW", "NCHW16c")
 
-    input = np.random.uniform(size=in_shape).astype(A.dtype)
+    input = tvm.testing.random_data(in_shape, A.dtype)
     output = np.transpose(input, axes=(0, 2, 3, 1))
     output = np.reshape(output, newshape=(1, 8, 8, 2, 16))
     output = np.transpose(output, axes=(0, 3, 1, 2, 4))
@@ -592,7 +592,7 @@ def test_shape():
     A = tvm.placeholder(shape=in_shape, dtype="float32", name="A")
     B = topi.shape(A, dtype)
 
-    input = np.random.uniform(size=in_shape).astype(A.dtype)
+    input = tvm.testing.random_data(in_shape, A.dtype)
     output = np.asarray(in_shape).astype(dtype)
 
     def check_device(device):

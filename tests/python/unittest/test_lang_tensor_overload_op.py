@@ -77,9 +77,9 @@ def test_combination():
     foo = tvm.build(s, [x, A, B, C, D], "llvm")
     ctx = tvm.cpu(0)
     x = 2
-    a = tvm.nd.array(np.random.uniform(size=(n, m)).astype(A.dtype), ctx)
-    b = tvm.nd.array(np.random.uniform(size=(n, m)).astype(B.dtype), ctx)
-    c = tvm.nd.array(np.random.uniform(size=(n, m)).astype(C.dtype), ctx)
+    a = tvm.nd.array(tvm.testing.random_data(shape=(n, m), dtype=A.dtype), ctx)
+    b = tvm.nd.array(tvm.testing.random_data(shape=(n, m), dtype=B.dtype), ctx)
+    c = tvm.nd.array(tvm.testing.random_data(shape=(n, m), dtype=C.dtype), ctx)
     d = tvm.nd.array(np.zeros((n, m), dtype=D.dtype), ctx)
     foo(x, a, b, c, d)
     tvm.testing.assert_allclose(d.asnumpy(), k + a.asnumpy() - b.asnumpy() * c.asnumpy() / x)
@@ -112,7 +112,7 @@ def verify_tensor_scalar_bop(shape, typ="add"):
 
         k_ = 2
         foo = tvm.build(s, [A, B, k] + sh, device, name="tensor_scalar_" + typ)
-        a_npy = np.random.uniform(size=shape).astype(A.dtype)
+        a_npy = tvm.testing.random_data(shape, A.dtype)
         if typ == "add":
             b_npy = a_npy + k_
         elif typ == "sub":
@@ -157,8 +157,8 @@ def verify_broadcast_bop(lhs_shape, rhs_shape, typ="add"):
             s = topi.generic.schedule_broadcast(C)
 
         foo = tvm.build(s, [A, B, C], device, name="broadcast_binary" + "_" + typ)
-        lhs_npy = np.random.uniform(size=lhs_shape).astype(A.dtype)
-        rhs_npy = np.random.uniform(size=rhs_shape).astype(A.dtype)
+        lhs_npy = tvm.testing.random_data(lhs_shape, A.dtype)
+        rhs_npy = tvm.testing.random_data(rhs_shape, A.dtype)
         if typ == "add":
             out_npy = lhs_npy + rhs_npy
         elif typ == "sub":
@@ -210,10 +210,10 @@ def verify_conv2d_scalar_bop(batch, in_size, in_channel, num_filter, kernel, str
 
         foo = tvm.build(s, [A, W, B, C], device, name="conv2d_scalar_" + typ)
 
-        a_npy = np.random.uniform(size=get_const_tuple(A.shape)).astype(A.dtype)
-        w_npy = np.random.uniform(size=get_const_tuple(W.shape)).astype(W.dtype)
+        a_npy = tvm.testing.random_data(get_const_tuple(A.shape), A.dtype)
+        w_npy = tvm.testing.random_data(get_const_tuple(W.shape), W.dtype)
         b_npy = topi.testing.conv2d_nchw_python(a_npy, w_npy, stride, padding)
-        c_npy = np.random.uniform(size=get_const_tuple(B.shape)).astype(B.dtype)
+        c_npy = tvm.testing.random_data(get_const_tuple(B.shape), B.dtype)
         if typ == "add":
             c_npy = b_npy + k
         elif typ == "sub":

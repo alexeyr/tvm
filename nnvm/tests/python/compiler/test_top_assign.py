@@ -39,7 +39,7 @@ def test_update():
 
         m = graph_runtime.create(graph, lib, ctx)
 
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
         m.set_input("w", data)
         m.run()
         out = m.get_input("w2", tvm.nd.empty(dshape, dtype))

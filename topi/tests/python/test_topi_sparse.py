@@ -24,6 +24,32 @@ import tvm.contrib.sparse as tvmsp
 from collections import namedtuple
 import time
 
+def random_data_adjusted(shape, dtype, max_zero):
+    data = tvm.testing.random_data(shape, dtype, -0.5, 0.5)
+    return np.maximum(data, 0.) if max_zero else data
+
+    # get the test data
+def get_ref_data_csrm(batch, in_dim, use_bias, dtype):
+    a_np = random_data_adjusted((batch, in_dim), dtype, max_zero=True)
+    b_np = random_data_adjusted((in_dim, 1), dtype, max_zero=False)
+    c_np = tvm.testing.random_data(batch, dtype)
+    if use_bias:
+        d_np = np.dot(a_np, b_np) + c_np.reshape((batch, 1))
+    else:
+        d_np = np.dot(a_np, b_np)
+    return (a_np, b_np, c_np, d_np)
+
+def get_ref_data_s(batch, in_dim, out_dim, use_bias, dtype):
+    mag = 10.
+    a_np = mag * random_data_adjusted((batch, in_dim), dtype, max_zero=True)
+    b_np = mag * random_data_adjusted((out_dim, in_dim), dtype, max_zero=False)
+    c_np = mag * random_data_adjusted(out_dim, dtype, max_zero=False)
+    if use_bias:
+        d_np = np.dot(a_np, b_np.T) + c_np
+    else:
+        d_np = np.dot(a_np, b_np.T)
+    return (a_np, b_np, c_np, d_np)
+
 def verify_dynamic_csrmv(batch, in_dim, out_dim, use_bias=True):
     nr, nc, n = tvm.var("nr"), tvm.var("nc"), tvm.var("n")
     dtype = 'float32'
@@ -34,17 +60,7 @@ def verify_dynamic_csrmv(batch, in_dim, out_dim, use_bias=True):
     s = tvm.create_schedule(D.op)
     dtype = A.dtype
 
-    # get the test data
-    def get_ref_data():
-        a_np = np.maximum(np.random.uniform(size=(batch, in_dim)).astype(dtype)-0.5, 0.)
-        b_np = np.random.uniform(size=(in_dim, 1)).astype(dtype)-0.5
-        c_np = np.random.uniform(size=(batch, )).astype(dtype)
-        if use_bias:
-            d_np = np.dot(a_np, b_np) + c_np.reshape((batch, 1))
-        else:
-            d_np = np.dot(a_np, b_np)
-        return (a_np, b_np, c_np, d_np)
-    a_np, b_np, c_np, d_np = get_ref_data()
+    a_np, b_np, c_np, d_np = get_ref_data_csrm(batch, in_dim, use_bias, dtype)
 
     def check_device(device):
         ctx = tvm.context(device, 0)
@@ -78,17 +94,7 @@ def verify_dynamic_csrmm(batch, in_dim, out_dim, use_bias=True):
     s = tvm.create_schedule(D.op)
     dtype = A.dtype
 
-    # get the test data
-    def get_ref_data():
-        a_np = np.maximum(np.random.uniform(size=(batch, in_dim)).astype(dtype)-0.5, 0.)
-        b_np = np.random.uniform(size=(in_dim, out_dim)).astype(dtype)-0.5
-        c_np = np.random.uniform(size=(batch, )).astype(dtype)
-        if use_bias:
-            d_np = np.dot(a_np, b_np) + c_np.reshape((batch, 1))
-        else:
-            d_np = np.dot(a_np, b_np)
-        return (a_np, b_np, c_np, d_np)
-    a_np, b_np, c_np, d_np = get_ref_data()
+    a_np, b_np, c_np, d_np = get_ref_data_csrm(batch, in_dim, use_bias, dtype)
 
     def check_device(device):
         ctx = tvm.context(device, 0)
@@ -118,18 +124,7 @@ def verify_dense_si(batch, in_dim, out_dim, use_bias=True, dtype='float32'):
     D = topi.sparse.dense(A, B, C if use_bias else None)
     s = tvm.create_schedule(D.op)
 
-    # get the test data
-    def get_ref_data():
-        mag = 10.
-        a_np = np.maximum(mag*(np.random.uniform(size=(batch, in_dim)).astype('float32')-0.5), 0.).astype(dtype)
-        b_np = (mag*(np.random.uniform(size=(out_dim, in_dim)).astype('float32')-.5)).astype(dtype)
-        c_np = (mag*(np.random.uniform(size=(out_dim,)).astype('float32')-.5)).astype(dtype)
-        if use_bias:
-            d_np = np.dot(a_np, b_np.T) + c_np
-        else:
-            d_np = np.dot(a_np, b_np.T)
-        return (a_np, b_np, c_np, d_np)
-    a_np, b_np, c_np, d_np = get_ref_data()
+    a_np, b_np, c_np, d_np = get_ref_data_s(batch, in_dim, out_dim, use_bias, dtype)
 
     def check_device(device):
         ctx = tvm.context(device, 0)
@@ -155,18 +150,7 @@ def verify_dense_sw(batch, in_dim, out_dim, use_bias=True, dtype='float32'):
     D = topi.sparse.dense(A, B, C if use_bias else None)
     s = tvm.create_schedule(D.op)
 
-    # get the test data
-    def get_ref_data():
-        mag = 10.
-        a_np = (mag*(np.random.uniform(size=(batch, in_dim)).astype('float32')-.5)).astype(dtype)
-        b_np = np.maximum(mag*(np.random.uniform(size=(out_dim, in_dim)).astype('float32')-0.5), 0.).astype(dtype)
-        c_np = (mag*(np.random.uniform(size=(out_dim,)).astype('float32')-.5)).astype(dtype)
-        if use_bias:
-            d_np = np.dot(a_np, b_np.T) + c_np
-        else:
-            d_np = np.dot(a_np, b_np.T)
-        return (a_np, b_np, c_np, d_np)
-    a_np, b_np, c_np, d_np = get_ref_data()
+    a_np, b_np, c_np, d_np = get_ref_data_s(batch, in_dim, out_dim, use_bias, dtype)
 
     def check_device(device):
         ctx = tvm.context(device, 0)

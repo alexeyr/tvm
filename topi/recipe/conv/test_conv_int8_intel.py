@@ -97,12 +97,8 @@ def run_inference(data_dtype, kernel_dtype, out_dtype, im_height, im_width, in_f
     kernel = tvm.placeholder(kernel_shape, name='kernel', dtype=kernel_dtype)
 
     # Create the numpy arrays to be used for executing conv models
-    if data_dtype == 'float32':
-        data_array = tvm.nd.array(np.random.rand(*data_shape).astype(dtype=data_dtype), CTX)
-        kernel_array = tvm.nd.array(np.random.rand(*kernel_shape).astype(dtype=kernel_dtype), CTX)
-    else:
-        data_array = tvm.nd.array(np.random.randint(100, size=data_shape).astype(data_dtype))
-        kernel_array = tvm.nd.array(np.random.randint(100, size=kernel_shape).astype(kernel_dtype))
+    data_array = tvm.nd.array(tvm.testing.random_data(data_shape, data_dtype), CTX)
+    kernel_array = tvm.nd.array(tvm.testing.random_data(kernel_shape, kernel_dtype), CTX)
 
     # c_orig will be used for declaration ouptut
     # c_sch will be used for scheduled computation output

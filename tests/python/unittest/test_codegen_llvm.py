@@ -66,8 +66,8 @@ def test_llvm_import():
         f = tvm.build(s, [A, B], "llvm")
         ctx = tvm.cpu(0)
         # launch the kernel.
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=n).astype(B.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype), ctx)
         f(a, b)
         tvm.testing.assert_allclose(
             b.asnumpy(), a.asnumpy() + 1.0)
@@ -119,8 +119,8 @@ def test_llvm_add_pipeline():
         ctx = tvm.cpu(0)
         # launch the kernel.
         n = nn
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=n).astype(B.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype), ctx)
         c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
         f(a, b, c)
         tvm.testing.assert_allclose(
@@ -152,7 +152,7 @@ def test_llvm_persist_parallel():
         f = tvm.build(s, [A, C], "llvm")
         ctx = tvm.cpu(0)
         # launch the kernel.
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
         c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
         f(a, c)
         tvm.testing.assert_allclose(c.asnumpy(),
@@ -168,7 +168,7 @@ def test_llvm_flip_pipeline():
             return
         n = tvm.convert(nn)
         A = tvm.placeholder((n + base), name='A')
-        C = tvm.compute((n,), lambda i: A(nn + base- i - 1), name='C')
+        C = tvm.compute((n,), lambda i: A(nn + base - i - 1), name='C')
         s = tvm.create_schedule(C.op)
         xo, xi = s[C].split(C.op.axis[0], factor=4)
         s[C].parallel(xo)
@@ -178,7 +178,7 @@ def test_llvm_flip_pipeline():
         ctx = tvm.cpu(0)
         # launch the kernel.
         n = nn
-        a = tvm.nd.array(np.random.uniform(size=(n + base)).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=(n + base), dtype=A.dtype), ctx)
         c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
         f(a, c)
         tvm.testing.assert_allclose(
@@ -234,7 +234,7 @@ def test_llvm_madd_pipeline():
         ctx = tvm.cpu(0)
         # launch the kernel.
         n = nn
-        a = tvm.nd.array(np.random.uniform(size=(n + base, stride)).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=(n + base, stride), dtype=A.dtype), ctx)
         c = tvm.nd.array(np.zeros((n, stride), dtype=C.dtype), ctx)
         f(a, c)
         tvm.testing.assert_allclose(
@@ -261,7 +261,7 @@ def test_llvm_temp_space():
         ctx = tvm.cpu(0)
         # launch the kernel.
         n = nn
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
         c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
         f(a, c)
         tvm.testing.assert_allclose(
@@ -290,8 +290,8 @@ def test_multiple_func():
         ctx = tvm.cpu(0)
         # launch the kernel.
         n = nn
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=n).astype(B.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype), ctx)
         c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
         fadd1(a, b, c)
         tvm.testing.assert_allclose(
@@ -314,7 +314,7 @@ def test_llvm_condition():
         f = tvm.build(s, [A, C], "llvm")
         ctx = tvm.cpu(0)
         # launch the kernel.
-        a = tvm.nd.array(np.random.uniform(size=(n,)).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=A.dtype), ctx)
         c = tvm.nd.empty((n,), A.dtype, ctx)
         f(a, c)
         c_np = a.asnumpy()
@@ -334,7 +334,7 @@ def test_llvm_bool():
         f = tvm.build(s, [A, C], "llvm")
         ctx = tvm.cpu(0)
         # launch the kernel.
-        a = tvm.nd.array(np.random.randint(0, 2, size=(n,)).astype(A.dtype), ctx)
+        a = tvm.nd.array(np.random.randint(0, 2, size=(n,), dtype=A.dtype), ctx)
         c = tvm.nd.empty((n,), C.dtype, ctx)
         f(a, c)
         c_np = a.asnumpy() == 1
@@ -356,9 +356,9 @@ def test_rank_zero():
         f = tvm.build(s, [A, scale, D], "llvm")
         ctx = tvm.cpu(0)
         # launch the kernel.
-        a = tvm.nd.array(np.random.randint(0, 2, size=(n,)).astype(A.dtype), ctx)
+        a = tvm.nd.array(np.random.randint(0, 2, size=(n,), dtype=A.dtype), ctx)
         sc = tvm.nd.array(
-            np.random.randint(0, 2, size=()).astype(scale.dtype), ctx)
+            np.random.randint(0, 2, size=(), dtype=scale.dtype), ctx)
         d = tvm.nd.empty((), D.dtype, ctx)
         f(a, sc, d)
         d_np = np.sum(a.asnumpy()) * sc.asnumpy() + 1
@@ -380,9 +380,9 @@ def test_rank_zero_bound_checkers():
             f = tvm.build(s, [A, scale, D], "llvm")
             ctx = tvm.cpu(0)
             # launch the kernel.
-            a = tvm.nd.array(np.random.randint(0, 2, size=(n,)).astype(A.dtype), ctx)
+            a = tvm.nd.array(np.random.randint(0, 2, size=(n,), dtype=A.dtype), ctx)
             sc = tvm.nd.array(
-                np.random.randint(0, 2, size=()).astype(scale.dtype), ctx)
+                np.random.randint(0, 2, size=(), dtype=scale.dtype), ctx)
             d = tvm.nd.empty((), D.dtype, ctx)
             f(a, sc, d)
             d_np = np.sum(a.asnumpy()) * sc.asnumpy() + 1

@@ -44,7 +44,7 @@ def test_resize():
         else:
             size = (dshape[2] * scale, dshape[3] * scale)
 
-        x_data = np.random.uniform(size=dshape).astype("float32")
+        x_data = tvm.testing.random_data(dshape, 'float32')
         if method == "BILINEAR":
             ref_res = topi.testing.bilinear_resize_python(x_data, size, layout)
         else:
@@ -119,7 +119,7 @@ def test_multibox_prior():
         if check_type_only:
             return
 
-        data = np.random.uniform(low=-1, high=1, size=dshape).astype("float32")
+        data = tvm.testing.random_data(dshape, "float32", -1, 1)
         func = relay.Function([x], z)
         func = relay.ir_pass.infer_type(func)
         for target, ctx in ctx_list():
@@ -155,7 +155,7 @@ def test_get_valid_counts():
     def verify_get_valid_counts(dshape, score_threshold):
         dtype = "float32"
         batch_size, num_anchor, elem_length = dshape
-        np_data = np.random.uniform(size=dshape).astype(dtype)
+        np_data = tvm.testing.random_data(dshape, dtype)
         np_out1 = np.zeros(shape=(batch_size,))
         np_out2 = np.zeros(shape=dshape).astype(dtype)
         for i in range(batch_size):
@@ -358,8 +358,8 @@ def test_roi_align():
 
         func = relay.Function([data, rois], z)
         func = relay.ir_pass.infer_type(func)
-        np_data = np.random.uniform(size=data_shape).astype("float32")
-        np_rois = np.random.uniform(size=rois_shape).astype('float32') * in_size
+        np_data = tvm.testing.random_data(data_shape, 'float32')
+        np_rois = tvm.testing.random_data(rois_shape, 'float32') * in_size
         np_rois[:, 0] = np.random.randint(low = 0, high = batch, size = num_roi)
         ref_res = topi.testing.roi_align_nchw_python(np_data, np_rois, pooled_size=pooled_size,
                                                      spatial_scale=spatial_scale,
@@ -391,8 +391,9 @@ def test_roi_pool():
 
         func = relay.Function([data, rois], z)
         func = relay.ir_pass.infer_type(func)
-        np_data = np.random.uniform(size=data_shape).astype("float32")
-        np_rois = np.random.uniform(size=rois_shape).astype('float32') * in_size
+        np_data = tvm.testing.random_data(data_shape, 'float32')
+        np_rois = tvm.testing.random_data(rois_shape, 'float32') * in_size
+        # generate floats equal to integers
         np_rois[:, 0] = np.random.randint(low = 0, high = batch, size = num_roi).astype('float32')
         ref_res = topi.testing.roi_pool_nchw_python(np_data, np_rois, pooled_size=pooled_size,
                                                      spatial_scale=spatial_scale)
@@ -488,7 +489,7 @@ def test_yolo_reorg_infer_shape():
 
 def test_yolo_reorg():
     def verify_yolo_reorg(shape, stride):
-        x_data = np.random.uniform(low=-1, high=1, size=shape).astype("float32")
+        x_data = tvm.testing.random_data(shape, 'float32', -1, 1)
         ref_res = topi.testing.reorg_python(x_data, stride)
 
         x = relay.var("x", relay.TensorType(shape, "float32"))
@@ -554,9 +555,9 @@ def test_deformable_conv2d():
             groups=groups,
             channels=out_channel)
         func = relay.Function([data, offset, kernel], y)
-        data = np.random.uniform(size=data_shape).astype(dtype)
-        offset = np.random.uniform(size=offset_shape).astype(dtype)
-        kernel = np.random.uniform(size=kernel_shape).astype(dtype)
+        data = tvm.testing.random_data(data_shape, dtype)
+        offset = tvm.testing.random_data(offset_shape, dtype)
+        kernel = tvm.testing.random_data(kernel_shape, dtype)
         ref_res = topi.testing.deformable_conv2d_nchw_python(data, offset, kernel, stride=(1, 1), padding=(1, 1), dilation=(1, 1), deformable_groups=deformable_groups, groups=groups)
 
         for target, ctx in ctx_list():

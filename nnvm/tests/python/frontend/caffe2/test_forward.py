@@ -81,7 +81,7 @@ def get_caffe2_output(model, x, dtype='float32'):
 
 def verify_caffe2_forward_impl(model, data_shape, out_shape):
     dtype = 'float32'
-    data = np.random.uniform(size=data_shape).astype(dtype)
+    data = tvm.testing.random_data(data_shape, dtype)
     c2_out = get_caffe2_output(model, data, dtype)
     for target, ctx in ctx_list():
         tvm_out = get_tvm_output(model, data, target, ctx, out_shape, dtype)

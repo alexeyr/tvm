@@ -149,7 +149,7 @@ def test_fold_resnet():
         batch_size=1, image_shape=image_shape)
     ishape = {"data" : data_shape}
     graph = nnvm.graph.create(net)
-    data = np.random.uniform(size=data_shape).astype("float32")
+    data = tvm.testing.random_data(data_shape, 'float32')
     # Initial pass do shape type inference
     shape, _ = graph_util.infer_shape(graph, **ishape)
     ishape.update(zip(graph.index.input_names, shape))

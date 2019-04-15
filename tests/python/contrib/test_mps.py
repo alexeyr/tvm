@@ -53,8 +53,8 @@ def test_matmul():
             return
         ctx = tvm.metal(0)
         f = tvm.build(s, [A, B, D], "metal")
-        a = tvm.nd.array(np.random.uniform(size=(n, l)).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=(l, m)).astype(B.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=(n, l), dtype=A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=(l, m), dtype=B.dtype), ctx)
         c = tvm.nd.array(np.zeros((n, m), dtype=C.dtype), ctx)
         f(a, b, c)
         tvm.testing.assert_allclose(
@@ -84,8 +84,8 @@ def test_conv2d():
             return
         ctx = tvm.metal(0)
         f = tvm.build(s1, [A, B, C], "metal")
-        a = tvm.nd.array(np.random.uniform(size=(n, h, w, ci)).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=(co, kh, kw, ci)).astype(B.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=(n, h, w, ci), dtype=A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=(co, kh, kw, ci), dtype=B.dtype), ctx)
         c = tvm.nd.array(np.zeros((n, h // stride, w // stride, co), dtype=C.dtype), ctx)
         f(a, b, c)
         # print(c.asnumpy())

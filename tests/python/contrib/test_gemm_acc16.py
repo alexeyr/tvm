@@ -63,10 +63,10 @@ def benchmark_fc_int8_acc16():
         t_evaluator = t_func.time_evaluator(t_func.entry_name, ctx, number=10)
 
 	    # generate the plain data
-        a_ = np.random.uniform(1, 10, size=(m, k)).astype("uint8")
-        b_ = np.random.uniform(1, 10,  size=(n, k)).astype("int8")
+        a_ = tvm.testing.random_data((m, k), 'uint8', 1, 10)
+        b_ = tvm.testing.random_data((n, k), 'int8', 1, 10)
 
-        packW = np.random.uniform(1, 10,  size=(n/128, 128*(k/2), 2)).astype("int8")
+        packW = tvm.testing.random_data((n/128, 128*(k/2), 2), 'int8', 1, 10)
         # This occurs in pre_compute stage
         for r_idx in range(n/128):
             for s_idx in range(128*(k/2)):

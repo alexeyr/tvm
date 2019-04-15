@@ -62,11 +62,11 @@ def test_conv2d():
     def verify():
         ctx = tvm.gpu(0)
         f = tvm.build(s, [X, W, Y], "cuda", target_host="llvm", name="conv2d")
-        x = tvm.nd.array(np.random.uniform(-1, 1, xshape).astype(np.float32),
+        x = tvm.nd.array(tvm.testing.random_data(xshape, 'float32', -1.0, 1.0),
                          ctx)
-        w = tvm.nd.array(np.random.uniform(-1, 1, wshape).astype(np.float32),
+        w = tvm.nd.array(tvm.testing.random_data(wshape, 'float32', -1.0, 1.0),
                          ctx)
-        y = tvm.nd.array(np.random.uniform(-1, 1, yshape).astype(np.float32),
+        y = tvm.nd.array(tvm.testing.random_data(yshape, 'float32', -1.0, 1.0),
                          ctx)
         f(x, w, y)
 

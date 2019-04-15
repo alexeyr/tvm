@@ -116,7 +116,7 @@ def test_device_module_dump():
         f.export_library(path_dso)
 
         f1 = tvm.module.load(path_dso)
-        a = tvm.nd.array(np.random.uniform(size=1024).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=1024, dtype=A.dtype), ctx)
         b = tvm.nd.array(np.zeros(1024, dtype=A.dtype), ctx)
         f1(a, b)
         np.testing.assert_equal(b.asnumpy(), a.asnumpy() + 1)
@@ -136,7 +136,7 @@ def test_device_module_dump():
         path_dso = temp.relpath("dev_lib.stackvm")
         #f.export_library(path_dso)
         #f1 = tvm.module.load(path_dso)
-        a = tvm.nd.array(np.random.uniform(size=1024).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=1024, dtype=A.dtype), ctx)
         b = tvm.nd.array(np.zeros(1024, dtype=A.dtype), ctx)
         f(a, b)
         np.testing.assert_equal(b.asnumpy(), a.asnumpy() + 1)
@@ -172,7 +172,7 @@ def test_combine_module_llvm():
         m = tvm.module.load(path_dso)
         fadd1 = m['myadd1']
         fadd2 = m['myadd2']
-        a = tvm.nd.array(np.random.uniform(size=nn).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(nn, A.dtype), ctx)
         b = tvm.nd.array(np.zeros(nn, dtype=A.dtype), ctx)
         fadd1(a, b)
         np.testing.assert_equal(b.asnumpy(), a.asnumpy() + 1)
@@ -197,7 +197,7 @@ def test_combine_module_llvm():
         dll = ctypes.CDLL(path_dso)
         # Load the system wide library
         mm = tvm.module.system_lib()
-        a = tvm.nd.array(np.random.uniform(size=nn).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(nn, A.dtype), ctx)
         b = tvm.nd.array(np.zeros(nn, dtype=A.dtype), ctx)
         mm['myadd1'](a, b)
         np.testing.assert_equal(b.asnumpy(), a.asnumpy() + 1)

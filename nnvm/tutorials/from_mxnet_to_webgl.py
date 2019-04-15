@@ -411,8 +411,8 @@ def deploy_rpc():
     module.set_input(**rparams)
 
     # Set input data.
-    input_data = np.random.uniform(size=data_shape)
-    module.set_input('data', tvm.nd.array(input_data.astype('float32')))
+    input_data = np.random.uniform(size=data_shape).astype('float32')
+    module.set_input('data', tvm.nd.array(input_data))
 
     # Run.
     module.run()

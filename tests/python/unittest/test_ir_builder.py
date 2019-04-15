@@ -96,8 +96,8 @@ def test_cpu():
         fadd = tvm.build(s, [A, B, C], target)
         ctx = tvm.context(target, 0)
         # launch the kernel.
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=n).astype(B.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype), ctx)
         c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
         fadd(a, b, c)
         tvm.testing.assert_allclose(c.asnumpy(), a.asnumpy() + b.asnumpy())
@@ -137,8 +137,8 @@ def test_gpu():
         fadd = tvm.build(s, [A, B, C], target)
         ctx = tvm.context(target, 0)
         # launch the kernel.
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=n).astype(B.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype), ctx)
         c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
         fadd(a, b, c)
         tvm.testing.assert_allclose(c.asnumpy(), a.asnumpy() + b.asnumpy())

@@ -38,8 +38,8 @@ def test_matmul_add():
             return
         ctx = tvm.cpu(0)
         f = tvm.build(s, [A, B, D, bias], target)
-        a = tvm.nd.array(np.random.uniform(size=(n, l)).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=(l, m)).astype(B.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=(n, l), dtype=A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=(l, m), dtype=B.dtype), ctx)
         d = tvm.nd.array(np.zeros((n, m), dtype=D.dtype), ctx)
         bb = 10.0
         f(a, b, d, bb)

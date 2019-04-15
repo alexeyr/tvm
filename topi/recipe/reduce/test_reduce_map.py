@@ -68,7 +68,7 @@ def test_reduce_map(in_shape, axis, keepdims, type="sum", test_id=0):
         fcuda = tvm.build(s, [A, B], "cuda", name="sum")
 
     # Test
-    in_npy = np.random.normal(size=in_shape).astype(np.float32)
+    in_npy = tvm.testing.random_data(in_shape, dtype=np.float32)
     if type == "sum":
         out_npy = in_npy.sum(axis=axis, keepdims=keepdims)
     elif type == "max":

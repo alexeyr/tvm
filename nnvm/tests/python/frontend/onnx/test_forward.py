@@ -81,7 +81,7 @@ def get_caffe2_output(model, x, dtype='float32'):
 
 def verify_onnx_forward_impl(graph_file, data_shape, out_shape):
     dtype = 'float32'
-    x = np.random.uniform(size=data_shape)
+    x = tvm.testing.random_data(data_shape, dtype)
     model = onnx.load_model(graph_file)
     c2_out = get_caffe2_output(model, x, dtype)
     for target, ctx in ctx_list():
@@ -125,7 +125,7 @@ def test_reshape():
     model = helper.make_model(graph, producer_name='reshape_test')
 
     for target, ctx in ctx_list():
-        x = np.random.uniform(size=in_shape).astype('int32')
+        x = tvm.testing.random_data(in_shape, 'int32')
         tvm_out = get_tvm_output(model, x, target, ctx, ref_shape, 'float32')
 
     tvm.testing.assert_allclose(ref_shape, tvm_out.shape)
@@ -134,7 +134,7 @@ def test_reshape_like():
     in_shape = (4, 3, 3, 4)
     ref_shape = (3, 4, 4, 3)
 
-    ref_array = np.random.uniform(size=ref_shape).astype('float32')
+    ref_array = tvm.testing.random_data(ref_shape, 'float32')
     ref_node = onnx.helper.make_node('Constant',
                                  inputs=[],
                                  outputs=['ref_in'],
@@ -155,7 +155,7 @@ def test_reshape_like():
     model = helper.make_model(graph, producer_name='reshape_like_test')
 
     for target, ctx in ctx_list():
-        x = np.random.uniform(size=in_shape).astype('float32')
+        x = tvm.testing.random_data(in_shape, 'float32')
         tvm_out = get_tvm_output(model, x, target, ctx, ref_shape, 'float32')
 
     tvm.testing.assert_allclose(ref_shape, tvm_out.shape)
@@ -164,8 +164,8 @@ def _test_power_iteration(x_shape, y_shape):
     if isinstance(y_shape, int):
         y_shape = [y_shape]
 
-    x = np.random.uniform(size=x_shape).astype(np.float32)
-    y = np.random.uniform(size=y_shape).astype(np.float32)
+    x = tvm.testing.random_data(x_shape, 'float32')
+    y = tvm.testing.random_data(y_shape, 'float32')
 
     np_res = np.power(x, y).astype(np.float32)
 
@@ -206,7 +206,7 @@ def test_squeeze():
     model = helper.make_model(graph, producer_name='squeeze_test')
 
     for target, ctx in ctx_list():
-        x = np.random.uniform(size=in_shape).astype('float32')
+        x = tvm.testing.random_data(in_shape, 'float32')
         tvm_out = get_tvm_output(model, x, target, ctx, out_shape, 'float32')
 
     tvm.testing.assert_allclose(out_shape, tvm_out.shape)
@@ -227,13 +227,13 @@ def test_unsqueeze():
     model = helper.make_model(graph, producer_name='squeeze_test')
 
     for target, ctx in ctx_list():
-        x = np.random.uniform(size=in_shape).astype('float32')
+        x = tvm.testing.random_data(in_shape, 'float32')
         tvm_out = get_tvm_output(model, x, target, ctx, out_shape, 'float32')
 
     tvm.testing.assert_allclose(out_shape, tvm_out.shape)
 
 def verify_gather(in_shape, indices, axis, dtype):
-    x = np.random.uniform(size=in_shape).astype(dtype)
+    x = tvm.testing.random_data(in_shape, dtype)
     indices = np.array(indices, dtype="int32")
     out_np = np.take(x, indices, axis=axis)
 
@@ -282,14 +282,14 @@ def _test_slice_iteration(indata, outdata, starts, ends, axes=None):
     tvm.testing.assert_allclose(outdata, tvm_out)
 
 def test_slice():
-    x = np.random.randn(20, 10, 5).astype(np.float32)
+    x = tvm.testing.random_data((20, 10, 5), np.float32)
     _test_slice_iteration(x, x[0:3, 0:10], (0, 0), (3, 10), (0, 1))
     _test_slice_iteration(x, x[:, :, 3:4], (0, 0, 3), (20, 10, 4))
     _test_slice_iteration(x, x[:, 1:1000], (1), (1000), (1))
     _test_slice_iteration(x, x[:, 0:-1], (0), (-1), (1))
 
 def _test_onnx_op_elementwise(inshape, outfunc, npargs, dtype, opname, kwargs, rtol=1e-7, atol=1e-7):
-    indata = np.random.uniform(-1, 1, size=inshape).astype(dtype)
+    indata = tvm.testing.random_data(inshape, dtype, -1, 1)
     outdata = outfunc(indata, **npargs)
 
     y = helper.make_node(opname, ['in'], ['out'], **kwargs)
@@ -326,8 +326,8 @@ def test_matmul():
     a_shape = (4, 3)
     b_shape = (3, 4)
 
-    a_array = np.random.uniform(size=a_shape).astype('float32')
-    b_array = np.random.uniform(size=b_shape).astype('float32')
+    a_array = tvm.testing.random_data(a_shape, 'float32')
+    b_array = tvm.testing.random_data(b_shape, 'float32')
     out_np = np.matmul(a_array, b_array)
 
     mul_node = helper.make_node("MatMul", ["a", "b"], ["out"])
@@ -348,7 +348,7 @@ def test_matmul():
         tvm.testing.assert_allclose(out_np, tvm_out, rtol=1e-5, atol=1e-5)
 
 def verify_lrn(shape, nsize, dtype, alpha=None, beta=None, bias=None):
-    in_array = np.random.uniform(size=shape).astype(dtype)
+    in_array = tvm.testing.random_data(shape, dtype)
 
     if alpha == None and beta == None and bias==None:
         alpha = 0.0001
@@ -404,7 +404,7 @@ def _test_upsample_nearest():
     out_shape = (1, 1, 3*scale, 3*scale)
     y = helper.make_node("Upsample", ['in'], ['out'], mode='nearest', scales=[1.0, 1.0, 2.0, 2.0])
 
-    in_array = np.random.uniform(size=in_shape).astype(np.float32)
+    in_array = tvm.testing.random_data(in_shape, 'float32')
     out_array = topi.testing.upsampling_python(in_array, scale, "NCHW")
 
     graph = helper.make_graph([y],
@@ -424,7 +424,7 @@ def _test_upsample_bilinear():
     out_shape = (1, 1, 3*scale, 3*scale)
     y = helper.make_node("Upsample", ['in'], ['out'], mode='linear', scales=[1.0, 1.0, 2.0, 2.0])
 
-    in_array = np.random.uniform(size=in_shape).astype(np.float32)
+    in_array = tvm.testing.random_data(in_shape, 'float32')
     out_array = topi.testing.bilinear_resize_python(in_array, (3*scale, 3*scale), "NCHW")
 
     graph = helper.make_graph([y],
@@ -444,7 +444,7 @@ def _test_upsample_bilinear_opset9():
     out_shape = (1, 1, 3*scale, 3*scale)
     y = helper.make_node("Upsample", ['in','scales'], ['out'], mode='linear')
     scales=[1.0, 1.0, 2.0, 2.0]
-    in_array = np.random.uniform(size=in_shape).astype(np.float32)
+    in_array = tvm.testing.random_data(in_shape, np.float32)
     out_array = topi.testing.bilinear_resize_python(in_array, (3*scale, 3*scale), "NCHW")
 
     ref_array = np.array(scales)
@@ -476,7 +476,7 @@ def test_upsample():
 
 def _test_softmax(inshape, axis):
     opname = 'Softmax'
-    indata = np.random.uniform(size=inshape).astype(np.float32)
+    indata = tvm.testing.random_data(inshape, 'float32')
     outshape = inshape
     outdata = topi.testing.softmax_python(indata)
     if isinstance(axis, int):
@@ -504,9 +504,9 @@ def test_softmax():
 def verify_min(input_dim):
     dtype = 'float32'
 
-    a_np1 = np.random.uniform(size=input_dim).astype(dtype)
-    a_np2 = np.random.uniform(size=input_dim).astype(dtype)
-    a_np3 = np.random.uniform(size=input_dim).astype(dtype)
+    a_np1 = tvm.testing.random_data(input_dim, dtype)
+    a_np2 = tvm.testing.random_data(input_dim, dtype)
+    a_np3 = tvm.testing.random_data(input_dim, dtype)
 
     b_np = np.min((a_np1, a_np2, a_np3), axis=0)
 
@@ -536,9 +536,9 @@ def test_forward_min():
 def verify_max(input_dim):
     dtype = 'float32'
 
-    a_np1 = np.random.uniform(size=input_dim).astype(dtype)
-    a_np2 = np.random.uniform(size=input_dim).astype(dtype)
-    a_np3 = np.random.uniform(size=input_dim).astype(dtype)
+    a_np1 = tvm.testing.random_data(input_dim, dtype)
+    a_np2 = tvm.testing.random_data(input_dim, dtype)
+    a_np3 = tvm.testing.random_data(input_dim, dtype)
 
     b_np = np.max((a_np1, a_np2, a_np3), axis=0)
 
@@ -568,9 +568,9 @@ def test_forward_max():
 def verify_mean(input_dim):
     dtype = 'float32'
 
-    a_np1 = np.random.uniform(size=input_dim).astype(dtype)
-    a_np2 = np.random.uniform(size=input_dim).astype(dtype)
-    a_np3 = np.random.uniform(size=input_dim).astype(dtype)
+    a_np1 = tvm.testing.random_data(input_dim, dtype)
+    a_np2 = tvm.testing.random_data(input_dim, dtype)
+    a_np3 = tvm.testing.random_data(input_dim, dtype)
 
     b_np = np.mean((a_np1, a_np2, a_np3), axis=0)
 
@@ -600,7 +600,7 @@ def test_forward_mean():
 def verify_hardsigmoid(input_dim, alpha, beta):
     dtype = 'float32'
 
-    a_np1 = np.random.uniform(size=input_dim).astype(dtype)
+    a_np1 = tvm.testing.random_data(input_dim, dtype)
 
     b_np = np.clip(a_np1 * alpha + beta, 0, 1)
 
@@ -630,7 +630,7 @@ def verify_argmin(input_dim, axis=None, keepdims=None):
             result = np.expand_dims(result, axis)
         return result.astype(data.dtype)
 
-    a_np1 = np.random.uniform(-10, 10, input_dim).astype(np.int32)
+    a_np1 = tvm.testing.random_data(input_dim, 'int32', -10, 10)
     if keepdims is None and axis is None:
         b_np = _argmin_numpy(a_np1)
         node = onnx.helper.make_node('ArgMin',
@@ -675,7 +675,7 @@ def verify_argmax(input_dim, axis=None, keepdims=None):
             result = np.expand_dims(result, axis)
         return result.astype(data.dtype)
 
-    a_np1 = np.random.uniform(-10, 10, input_dim).astype(np.int32)
+    a_np1 = tvm.testing.random_data(input_dim, 'int32', -10, 10)
 
     if keepdims is None and axis is None:
         b_np = _argmax_numpy(a_np1)
@@ -729,7 +729,7 @@ def test_forward_arg_min_max():
             verify_argmax([3,4,4], axis, keepdims)
 
 def verify_constantfill(is_shape, input_dim, out_dim, value, dtype, **kwargs):
-    input_a = np.random.uniform(size=input_dim).astype(dtype)
+    input_a = tvm.testing.random_data(input_dim, dtype)
     out = np.empty(shape=out_dim, dtype=dtype)
     out.fill(value)
 
@@ -789,9 +789,9 @@ def verify_pad(indata, pads, value=0.0):
     tvm.testing.assert_allclose(outdata, tvm_out, rtol=1e-5, atol=1e-5)
 
 def test_pad():
-    verify_pad(np.random.randn(2, 2).astype(np.float32), [0, 1, 0, 0], 0.0)
-    verify_pad(np.random.randn(2, 3).astype(np.float32), [1, 0, 0, 1], 0.0)
-    verify_pad(np.random.randn(3, 2).astype(np.float32), [0, 0, 1, 0], 5.0)
+    verify_pad(tvm.testing.random_data((2, 2), np.float32), [0, 1, 0, 0], 0.0)
+    verify_pad(tvm.testing.random_data((2, 3), np.float32), [1, 0, 0, 1], 0.0)
+    verify_pad(tvm.testing.random_data((3, 2), np.float32), [0, 0, 1, 0], 5.0)
 
 def verify_reduce_x(name, indata, axis, keepdims):
     indata = np.array(indata).astype(np.float32)
@@ -829,43 +829,43 @@ def verify_reduce_x(name, indata, axis, keepdims):
 
 def test_reduce_max():
     verify_reduce_x("ReduceMax",
-                    np.random.randn(3, 2, 2).astype(np.float32),
+                    tvm.testing.random_data((3, 2, 2), np.float32),
                     axis=None, keepdims=1)
     verify_reduce_x("ReduceMax",
-                    np.random.randn(3, 2, 3).astype(np.float32),
+                    tvm.testing.random_data((3, 2, 3), np.float32),
                     axis=None, keepdims=0)
     verify_reduce_x("ReduceMax",
-                    np.random.randn(3, 3, 3).astype(np.float32),
+                    tvm.testing.random_data((3, 3, 3), np.float32),
                     axis=(1,), keepdims=1)
 
 def test_reduce_min():
     verify_reduce_x("ReduceMin",
-                    np.random.randn(3, 2, 2).astype(np.float32),
+                    tvm.testing.random_data((3, 2, 2), np.float32),
                     axis=None, keepdims=1)
     verify_reduce_x("ReduceMin",
-                    np.random.randn(3, 2, 3).astype(np.float32),
+                    tvm.testing.random_data((3, 2, 3), np.float32),
                     axis=None, keepdims=0)
     verify_reduce_x("ReduceMin",
-                    np.random.randn(3, 3, 3).astype(np.float32),
+                    tvm.testing.random_data((3, 3, 3), np.float32),
                     axis=(1,), keepdims=1)
 
 def test_reduce_sum():
     verify_reduce_x("ReduceSum",
-                    np.random.randn(3, 2, 2).astype(np.float32),
+                    tvm.testing.random_data((3, 2, 2), np.float32),
                     axis=None, keepdims=1)
     verify_reduce_x("ReduceSum",
-                    np.random.randn(3, 2, 3).astype(np.float32),
+                    tvm.testing.random_data((3, 2, 3), np.float32),
                     axis=None, keepdims=0)
     verify_reduce_x("ReduceSum",
-                    np.random.randn(3, 3, 3).astype(np.float32),
+                    tvm.testing.random_data((3, 3, 3), np.float32),
                     axis=(1,), keepdims=1)
 
 def test_reduce_mean():
     verify_reduce_x("ReduceMean",
-                    np.random.randn(3, 2, 2).astype(np.float32),
+                    tvm.testing.random_data((3, 2, 2), np.float32),
                     axis=None, keepdims=1)
     verify_reduce_x("ReduceMean",
-                    np.random.randn(3, 2, 3).astype(np.float32),
+                    tvm.testing.random_data((3, 2, 3), np.float32),
                     axis=None, keepdims=0)
     verify_reduce_x("ReduceMean",
                     np.random.randn(3, 3, 3).astype(np.float32),
@@ -929,9 +929,9 @@ def test_binary_ops():
             tvm_out = get_tvm_output(model, [x, y], target, ctx)
             tvm.testing.assert_allclose(out_np, tvm_out, rtol=rtol, atol=atol)
 
-    x = np.random.uniform(size=in_shape).astype(dtype)
-    y = np.random.uniform(size=in_shape).astype(dtype)
-    z = np.random.uniform(size=(3,)).astype(dtype)
+    x = tvm.testing.random_data(in_shape, dtype)
+    y = tvm.testing.random_data(in_shape, dtype)
+    z = tvm.testing.random_data(shape=(3,), dtype=dtype)
     verify_binary_ops("Add",x, y, x + y, broadcast=None)
     verify_binary_ops("Add", x, z,  x + z, broadcast=True)
     verify_binary_ops("Sub", x, y, x - y, broadcast=None)
@@ -960,7 +960,7 @@ def test_single_ops():
             tvm_out = get_tvm_output(model, [x], target, ctx)
             tvm.testing.assert_allclose(out_np, tvm_out, rtol=rtol, atol=atol)
 
-    x = np.random.uniform(size=in_shape).astype(dtype)
+    x = tvm.testing.random_data(in_shape, dtype)
     verify_single_ops("Neg",x, -x)
     verify_single_ops("Abs",x, np.abs(x))
     verify_single_ops("Reciprocal",x, 1/x, rtol=1e-5, atol=1e-5)

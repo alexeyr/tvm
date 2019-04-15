@@ -61,8 +61,8 @@ def test_fp16_conversion():
         s = tvm.create_schedule([B.op])
         func = tvm.build(s, [A, B], 'llvm')
 
-        x_tvm = tvm.nd.array(100 * np.random.randn(n).astype(src) - 50)
-        y_tvm = tvm.nd.array(100 * np.random.randn(n).astype(dst) - 50)
+        x_tvm = tvm.nd.array(tvm.testing.random_data(n, src, -50, 50))
+        y_tvm = tvm.nd.empty((n,), dst)
 
         func(x_tvm, y_tvm)
 

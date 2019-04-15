@@ -38,8 +38,8 @@ def test_binary_op():
             x = relay.var("x", t1)
             y = relay.var("y", t2)
             z = opfunc(x, y)
-            x_data = np.random.rand(5, 10, 5).astype(t1.dtype)
-            y_data = np.random.rand(5, 10, 5).astype(t2.dtype)
+            x_data = tvm.testing.random_data(shape=(5, 10, 5), dtype=t1.dtype)
+            y_data = tvm.testing.random_data(shape=(5, 10, 5), dtype=t2.dtype)
             ref_res = ref(x_data, y_data)
             func = relay.Function([x, y], z)
 
@@ -74,8 +74,8 @@ def test_cmp_type():
             x = relay.var("x", t1)
             y = relay.var("y", t2)
             z = op(x, y)
-            x_data = np.random.rand(*x_shape).astype(t1.dtype)
-            y_data = np.random.rand(*y_shape).astype(t2.dtype)
+            x_data = tvm.testing.random_data(x_shape, t1.dtype)
+            y_data = tvm.testing.random_data(y_shape, t2.dtype)
             ref_res = ref(x_data, y_data)
             func = relay.Function([x, y], z)
 
@@ -102,8 +102,8 @@ def test_binary_int_broadcast():
         y_shape = (5, 10, 1)
         t1 = relay.TensorType(x_shape, 'int32')
         t2 = relay.TensorType(y_shape, 'int32')
-        x_data = np.random.rand(*x_shape).astype(t1.dtype)
-        y_data = np.random.rand(*y_shape).astype(t2.dtype)
+        x_data = tvm.testing.random_data(x_shape, t1.dtype)
+        y_data = tvm.testing.random_data(y_shape, t2.dtype)
         func = relay.Function([x, y], z)
         ref_res = ref(x_data, y_data)
 
@@ -124,9 +124,9 @@ def test_where():
     assert zz.checked_type == relay.TensorType(shape, dtype)
 
     func = relay.Function([cond, x, y], z)
-    condition = np.random.uniform(low=-1, high=1, size=shape).astype(dtype)
-    x = np.random.uniform(size=shape).astype(dtype)
-    y = np.random.uniform(size=shape).astype(dtype)
+    condition = tvm.testing.random_data(shape, dtype, -1, 1)
+    x = tvm.testing.random_data(shape, dtype)
+    y = tvm.testing.random_data(shape, dtype)
     ref_res = np.where(condition, x, y)
     for target, ctx in ctx_list():
         for kind in ["graph", "debug"]:
@@ -155,7 +155,7 @@ def verify_reduce(funcs, data, axis, keepdims, exclude, output, dtype="float32")
         return
 
     func = relay.Function([x], z)
-    x_data = np.random.uniform(size=data).astype(dtype)
+    x_data = tvm.testing.random_data(data, dtype)
     if ref_func in [np.sum]:
         ref_res = ref_func(x_data + 0, axis=axis, dtype=dtype, keepdims=keepdims)
     elif ref_func in [np.max, np.min, np.mean, np.prod]:
@@ -225,7 +225,7 @@ def test_strided_slice():
             assert func.body.checked_type == relay.ty.TensorType(output, "float32")
         if not test_ref:
             return
-        x_data = np.random.uniform(size=dshape).astype("float32")
+        x_data = tvm.testing.random_data(dshape, 'float32')
         ref_res = topi.testing.strided_slice_python(
             x_data, begin, end, strides)
         for target, ctx in ctx_list():

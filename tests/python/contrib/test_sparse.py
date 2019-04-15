@@ -20,6 +20,9 @@ import tvm.ndarray as _nd
 import numpy as np
 from collections import namedtuple
 
+def random_data_with_zeros(shape, dtype):
+    return np.maximum(tvm.testing.random_data(shape, dtype, -0.6, 0.4), 0.0)
+
 def test_static_tensor():
     dtype = 'float32'
     stype = 'csr'
@@ -30,7 +33,7 @@ def test_static_tensor():
     A = tvmsp.placeholder(shape=(m, n), name='A', dtype=dtype)
     assert(A.stype == 'csr')
     n = 3
-    a = np.maximum(np.random.uniform(size=(n,n)).astype(dtype)-.6, 0.)
+    a = random_data_with_zeros((n, n), dtype)
     a = tvmsp.array(a, ctx)
     A.data = tvm.placeholder(a.data.shape, dtype, name='A_data')
     Ab = tvm.decl_buffer(a.data.shape, dtype, name='A_data')
@@ -56,7 +59,7 @@ def test_dynamic_tensor():
     C = tvm.compute(A.data.shape, lambda i: A.data[i] * 2., tag='cs_scatter')
     s = tvm.create_schedule(C.op)
     _nr, _nc = 3, 5
-    a = np.maximum(np.random.uniform(size=(_nr, _nc)).astype(dtype)-.6, 0.)
+    a = random_data_with_zeros((_nr, _nc), dtype)
     a = tvmsp.array(a, ctx)
     assert a.data.dtype == a.dtype
     Ab = namedtuple('CSRBuffer', ['data', 'indices', 'indptr'])
@@ -82,7 +85,7 @@ def test_sparse_array_tuple():
     C = tvm.compute(A.data.shape, lambda i: A.data[i] * 2., tag='cs_scatter')
     s = tvm.create_schedule(C.op)
     _nr, _nc = 3, 5
-    a = np.maximum(np.random.uniform(size=(_nr, _nc)).astype(dtype)-.6, 0.)
+    a = random_data_with_zeros((_nr, _nc), dtype)
     # convert to sparse array tuple
     source_array = a
     ridx, cidx = np.nonzero(source_array)

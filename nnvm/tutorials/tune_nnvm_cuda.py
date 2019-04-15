@@ -246,7 +246,7 @@ def tune_and_evaluate(tuning_opt):
         # load parameters
         ctx = tvm.context(str(target), 0)
         module = runtime.create(graph, lib, ctx)
-        data_tvm = tvm.nd.array((np.random.uniform(size=input_shape)).astype(dtype))
+        data_tvm = tvm.nd.array(tvm.testing.random_data(input_shape, dtype))
         module.set_input('data', data_tvm)
         module.set_input(**params)
 

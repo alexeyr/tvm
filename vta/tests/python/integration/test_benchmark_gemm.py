@@ -82,9 +82,9 @@ def test_gemm():
             ctx = remote.ext_dev(0)
             # Data in original format
             data_orig = np.random.randint(
-                -128, 128, size=(batch_size, channel)).astype(data.dtype)
+                -128, 128, size=(batch_size, channel), dtype=data.dtype)
             weight_orig = np.random.randint(
-                -128, 128, size=(channel, channel)).astype(weight.dtype)
+                -128, 128, size=(channel, channel), dtype=weight.dtype)
             data_packed = data_orig.reshape(
                 batch_size // env.BATCH, env.BATCH,
                 channel // env.BLOCK_IN, env.BLOCK_IN).transpose((0, 2, 1, 3))

@@ -39,8 +39,8 @@ def test_bigendian_rpc():
         f = tvm.build(s, [A, B], target, name="myadd")
 
         ctx = remote.cpu(0)
-        a = tvm.nd.array(np.random.randint(0, 256, size=shape).astype(A.dtype), ctx=ctx)
-        b = tvm.nd.array(np.zeros(shape).astype(A.dtype), ctx=ctx)
+        a = tvm.nd.array(np.random.randint(0, 256, size=shape, dtype=A.dtype), ctx=ctx)
+        b = tvm.nd.array(np.zeros(shape, dtype=A.dtype), ctx=ctx)
         temp = util.tempdir()
         path_dso = temp.relpath("dev_lib.o")
         f.save(path_dso)
@@ -104,7 +104,7 @@ def test_rpc_file_exchange():
         return
     server = rpc.Server("localhost")
     remote = rpc.connect(server.host, server.port)
-    blob = bytearray(np.random.randint(0, 10, size=(10)))
+    blob = bytearray(np.random.randint(0, 10, size=10))
     remote.upload(blob, "dat.bin")
     rev = remote.download("dat.bin")
     assert(rev == blob)
@@ -131,7 +131,7 @@ def test_rpc_remote_module():
         f.export_library(path_dso)
         remote.upload(path_dso)
         f1 = remote.load_module("dev_lib.so")
-        a = tvm.nd.array(np.random.uniform(size=1024).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=1024, dtype=A.dtype), ctx)
         b = tvm.nd.array(np.zeros(1024, dtype=A.dtype), ctx)
         time_f = f1.time_evaluator(f1.entry_name, remote.cpu(0), number=10)
         cost = time_f(a, b).mean
@@ -172,7 +172,7 @@ def test_rpc_remote_module():
         fhost = remote.load_module("myadd.o")
         fdev = remote.load_module("myadd.cl")
         fhost.import_module(fdev)
-        a = tvm.nd.array(np.random.uniform(size=1024).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=1024, dtype=A.dtype), ctx)
         b = tvm.nd.array(np.zeros(1024, dtype=A.dtype), ctx)
         fhost(a, b)
         np.testing.assert_equal(b.asnumpy(), a.asnumpy() + 1)
@@ -181,7 +181,7 @@ def test_rpc_remote_module():
         f.export_library(path_tar)
         remote.upload(path_tar)
         fhost = remote.load_module("myadd.tar")
-        a = tvm.nd.array(np.random.uniform(size=1024).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=1024, dtype=A.dtype), ctx)
         b = tvm.nd.array(np.zeros(1024, dtype=A.dtype), ctx)
         fhost(a, b)
         np.testing.assert_equal(b.asnumpy(), a.asnumpy() + 1)
@@ -251,7 +251,7 @@ def test_local_func():
     fadd = f1(10)
     assert fadd(12) == 22
 
-    blob = bytearray(np.random.randint(0, 10, size=(10)))
+    blob = bytearray(np.random.randint(0, 10, size=10))
     client.upload(blob, "dat.bin")
     rev = client.download("dat.bin")
     assert rev == blob

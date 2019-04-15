@@ -32,8 +32,8 @@ def verify_batch_matmul(batch, M, N, K):
     # use memoize to pickle the test data for next time use
     @memoize("topi.tests.test_topi_batch_matmul")
     def get_ref_data():
-        a_np = np.random.uniform(size=(batch, M, K)).astype(dtype)
-        b_np = np.random.uniform(size=(batch, N, K)).astype(dtype)
+        a_np = tvm.testing.random_data(shape=(batch, M, K), dtype=dtype)
+        b_np = tvm.testing.random_data(shape=(batch, N, K), dtype=dtype)
         c_np = topi.testing.batch_matmul(a_np, b_np)
         return (a_np, b_np, c_np)
     # get the test data

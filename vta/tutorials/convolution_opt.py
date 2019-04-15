@@ -386,10 +386,10 @@ ctx = remote.ext_dev(0)
 # of (-128, 128] in NCHW layout
 data_np = np.random.randint(
     -128, 128,
-    size=(batch_size, in_channels, height, width)).astype(data.dtype)
+    size=(batch_size, in_channels, height, width), dtype=data.dtype)
 kernel_np = np.random.randint(
     -128, 128,
-    size=(out_channels, in_channels, kernel_h, kernel_w)).astype(kernel.dtype)
+    size=(out_channels, in_channels, kernel_h, kernel_w), dtype=kernel.dtype)
 
 # Apply packing to the data and kernel arrays from a 2D NCHW
 # to a 4D NCHWnc packed layout

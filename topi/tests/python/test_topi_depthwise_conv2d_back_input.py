@@ -64,8 +64,8 @@ def verify_depthwise_conv2d_back_input(batch, in_channel, in_h, channel_multipli
         # use memoize to pickle the test data for next time use
         @memoize("topi.tests.test_topi_depthwise_conv2d_backward_input.nhwc")
         def get_ref_data():
-            out_grad_np = np.random.uniform(size=out_grad_shape).astype(dtype)
-            filter_np = np.random.uniform(size=filter_shape).astype(dtype)
+            out_grad_np = tvm.testing.random_data(out_grad_shape, dtype)
+            filter_np = tvm.testing.random_data(filter_shape, dtype)
             dilated_out_grad_np = topi.testing.dilate_python(out_grad_np, [1, stride_h, stride_w, 1])
             # padding params in forward propagation
             fpad_top, fpad_left, fpad_bottom, fpad_right = get_pad_tuple([padding_h, padding_w], (filter_h, filter_w))

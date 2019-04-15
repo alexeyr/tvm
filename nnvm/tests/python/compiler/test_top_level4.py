@@ -36,7 +36,7 @@ def verify_transpose(dshape, axes):
         graph, lib, _ = nnvm.compiler.build(y, target, {"x": dshape})
         m = graph_runtime.create(graph, lib, ctx)
         # set input
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
         m.run(x=data)
         out_np = np.transpose(data.asnumpy(), axes=axes) + 1
         out = m.get_output(0, tvm.nd.empty(out_np.shape))
@@ -67,7 +67,7 @@ def verify_reduce_explicit(dshape, data, result, fsym, oshape=None, otype='float
 def verify_reduce(dshape, fnp, fsym, oshape=None, otype='float32', **kwargs):
     """ Verify reduce operations by generating data at random and calling numpy
     version as reference """
-    data = np.random.uniform(size=dshape).astype(otype)
+    data = tvm.testing.random_data(dshape, otype)
     result = fnp(data + 0, **kwargs)
     verify_reduce_explicit(dshape, data, result, fsym, oshape=oshape, otype=otype, **kwargs)
 
@@ -80,7 +80,7 @@ def verify_collapse(dshape, target_shape, fnp):
         graph, lib, _ = nnvm.compiler.build(y, target,
                                             {"x": dshape, "t": target_shape})
         m = graph_runtime.create(graph, lib, ctx)
-        data = np.random.uniform(size=dshape).astype(dtype)
+        data = tvm.testing.random_data(dshape, dtype)
         m.run(x=data)
         out = m.get_output(0, tvm.nd.empty(target_shape))
         out_np = fnp(data)
@@ -156,7 +156,7 @@ def verify_flip(ishape, axis):
     x = sym.Variable("x")
     y = sym.flip(x, axis=axis) + 1
     dtype = "float32"
-    x_np = np.random.uniform(size=ishape).astype(dtype)
+    x_np = tvm.testing.random_data(ishape, dtype)
     res = np.flip(x_np, axis) + 1
 
     for target, ctx in ctx_list():
@@ -186,7 +186,7 @@ def verify_reshape(dshape, oshape):
         graph, lib, _ = nnvm.compiler.build(y, target, {"x": dshape})
         m = graph_runtime.create(graph, lib, ctx)
         # set input
-        data = tvm.nd.array(np.random.uniform(size=dshape).astype(dtype))
+        data = tvm.nd.array(tvm.testing.random_data(dshape, dtype))
         m.run(x=data)
         out_np = data.asnumpy().reshape(oshape) + 1
         out = m.get_output(0, tvm.nd.empty(out_np.shape))
@@ -449,7 +449,7 @@ def test_full():
         s = sym.full_like(data=data, fill_value=value, name="s")
         graph, lib, _ = nnvm.compiler.build(s, target, {"data": shape})
         m = graph_runtime.create(graph, lib, ctx)
-        m.run(data=np.random.uniform(size=shape).astype(dtype))
+        m.run(data=tvm.testing.random_data(shape, dtype))
         out = m.get_output(0, tvm.nd.empty(shape, dtype=dtype))
         tvm.testing.assert_allclose(
             out.asnumpy(),
@@ -459,7 +459,7 @@ def test_full():
         s = sym.ones_like(data=data, fill_value=value, name="s")
         graph, lib, _ = nnvm.compiler.build(s, target, {"data": shape})
         m = graph_runtime.create(graph, lib, ctx)
-        m.run(data=np.random.uniform(size=shape).astype(dtype))
+        m.run(data=tvm.testing.random_data(shape, dtype))
         out = m.get_output(0, tvm.nd.empty(shape, dtype=dtype))
         tvm.testing.assert_allclose(
             out.asnumpy(),
@@ -469,7 +469,7 @@ def test_full():
         s = sym.zeros_like(data=data, fill_value=value, name="s")
         graph, lib, _ = nnvm.compiler.build(s, target, {"data": shape})
         m = graph_runtime.create(graph, lib, ctx)
-        m.run(data=np.random.uniform(size=shape).astype(dtype))
+        m.run(data=tvm.testing.random_data(shape, dtype))
         out = m.get_output(0, tvm.nd.empty(shape, dtype=dtype))
         tvm.testing.assert_allclose(
             out.asnumpy(),
@@ -546,7 +546,7 @@ def verify_multibox_prior(dshape, sizes=(1,), ratios=(1,), steps=(-1, -1),
     for target, ctx in ctx_list():
         graph, lib, _ = nnvm.compiler.build(out, target, {"data": dshape})
         m = graph_runtime.create(graph, lib, ctx)
-        m.set_input("data", np.random.uniform(size=dshape).astype(dtype))
+        m.set_input("data", tvm.testing.random_data(dshape, dtype))
         m.run()
         tvm_out = m.get_output(0, tvm.nd.empty(np_out.shape, dtype))
         tvm.testing.assert_allclose(tvm_out.asnumpy(), np_out, atol=1e-5, rtol=1e-5)
@@ -690,13 +690,13 @@ def verify_where(condition, x, y):
 
 def test_where():
     shape = (13, 8, 224, 224, 6)
-    condition = np.random.uniform(low=-1, high=1, size=shape).astype("float32")
-    x = np.random.uniform(size=shape).astype("float32")
-    y = np.random.uniform(size=shape).astype("float32")
+    condition = tvm.testing.random_data(shape, 'float32', -1, 1)
+    x = tvm.testing.random_data(shape, 'float32')
+    y = tvm.testing.random_data(shape, 'float32')
     verify_where(condition, x, y)
-    condition = np.random.uniform(low=-1, high=1, size=(shape[0],)).astype("float32")
-    x = np.random.uniform(size=shape).astype("float32")
-    y = np.random.uniform(size=shape).astype("float32")
+    condition = tvm.testing.random_data(shape[0], 'float32', -1, 1)
+    x = tvm.testing.random_data(shape, 'float32')
+    y = tvm.testing.random_data(shape, 'float32')
     verify_where(condition, x, y)
 
 def test_argmax():
@@ -714,7 +714,7 @@ def test_argmax():
     with nnvm.compiler.build_config(opt_level=2):
         graph, lib, _ = nnvm.compiler.build(y, target, {"x": dshape})
     m = graph_runtime.create(graph, lib, ctx)
-    data = np.random.uniform(size=dshape).astype(dtype)
+    data = tvm.testing.random_data(dshape, dtype)
     m.run(x=data)
     np_reshape = np.reshape(data, (1, 320, 640, 2))
     np_transpose = np.transpose(np_reshape, axes=(0, 3, 1, 2))

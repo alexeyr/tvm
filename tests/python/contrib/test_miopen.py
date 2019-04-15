@@ -60,16 +60,16 @@ def test_conv2d():
     def verify():
         ctx = tvm.rocm(0)
         f = tvm.build(s, [X, W, Y], "rocm", target_host="llvm", name="conv2d")
-        x = tvm.nd.array(np.random.uniform(-1, 1, xshape).astype(np.float32), ctx)
-        w = tvm.nd.array(np.random.uniform(-1, 1, wshape).astype(np.float32), ctx)
-        y = tvm.nd.array(np.random.uniform(-1, 1, yshape).astype(np.float32), ctx)
+        x = tvm.nd.array(tvm.testing.random_data(xshape, 'float32', -1.0, 1.0), ctx)
+        w = tvm.nd.array(tvm.testing.random_data(wshape, 'float32', -1.0, 1.0), ctx)
+        y = tvm.nd.array(tvm.testing.random_data(yshape, 'float32', -1.0, 1.0), ctx)
         f(x, w, y)
 
         Y_ref = topi.nn.conv2d_nchw(X, W, (stride_h, stride_w), (pad_h, pad_w))
         with tvm.target.rocm():
             s_ref = topi.generic.schedule_conv2d_nchw([Y_ref])
         f_ref = tvm.build(s_ref, [X, W, Y_ref], "rocm")
-        y_ref = tvm.nd.array(np.random.uniform(-1, 1, yshape).astype(np.float32), ctx)
+        y_ref = tvm.nd.array(tvm.testing.random_data(yshape, 'float32', -1.0, 1.0), ctx)
         f_ref(x, w, y_ref)
         print("Max abs diff:", np.max(np.abs(y.asnumpy() - y_ref.asnumpy())))
         tvm.testing.assert_allclose(y.asnumpy(), y_ref.asnumpy(), atol=1e-3)

@@ -73,7 +73,7 @@ def verify_mxnet_frontend_impl(mx_symbol, data_shape=(1, 3, 224, 224), out_shape
         return out.asnumpy()
 
     # random input
-    x = np.random.uniform(size=data_shape)
+    x = tvm.testing.random_data(data_shape, dtype)
     if gluon_impl:
         gluon_out, gluon_sym = get_gluon_output(name, x)
         for target, ctx in ctx_list():
@@ -209,8 +209,8 @@ def test_forward_where():
     dtype = 'float32'
     mx_sym = mx.sym.where(cond, x, y)
     np_cond = np.array([[0, 1], [-1, 0]]).astype(dtype)
-    np_x = np.random.uniform(size=dshape).astype(dtype)
-    np_y = np.random.uniform(size=dshape).astype(dtype)
+    np_x = tvm.testing.random_data(dshape, dtype)
+    np_y = tvm.testing.random_data(dshape, dtype)
     mx_cond = mx.nd.array(np_cond)
     mx_x = mx.nd.array(np_x)
     mx_y = mx.nd.array(np_y)
@@ -249,8 +249,8 @@ def test_forward_maximum():
     dshape = (10, 20)
     dtype = 'float32'
     mx_sym = mx.sym._internal._maximum(a, b)
-    np_a = np.random.uniform(size=dshape).astype(dtype)
-    np_b = np.random.uniform(size=dshape).astype(dtype)
+    np_a = tvm.testing.random_data(dshape, dtype)
+    np_b = tvm.testing.random_data(dshape, dtype)
     mx_a = mx.nd.array(np_a)
     mx_b = mx.nd.array(np_b)
     mod = mx.mod.Module(mx_sym, label_names=None, data_names=['a', 'b'])
@@ -280,8 +280,8 @@ def test_forward_minimum():
     dshape = (10, 20)
     dtype = 'float32'
     mx_sym = mx.sym._internal._minimum(a, b)
-    np_a = np.random.uniform(size=dshape).astype(dtype)
-    np_b = np.random.uniform(size=dshape).astype(dtype)
+    np_a = tvm.testing.random_data(dshape, dtype)
+    np_b = tvm.testing.random_data(dshape, dtype)
     mx_a = mx.nd.array(np_a)
     mx_b = mx.nd.array(np_b)
     mod = mx.mod.Module(mx_sym, label_names=None, data_names=['a', 'b'])

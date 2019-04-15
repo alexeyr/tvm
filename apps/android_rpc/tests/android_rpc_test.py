@@ -47,7 +47,7 @@ def test_rpc_module():
     n = tvm.convert(1024)
     A = tvm.placeholder((n,), name='A')
     B = tvm.compute(A.shape, lambda *i: A(*i) + 1.0, name='B')
-    a_np = np.random.uniform(size=1024).astype(A.dtype)
+    a_np = tvm.testing.random_data(shape=1024, dtype=A.dtype)
     temp = util.tempdir()
 
     # Establish remote connection with target hardware

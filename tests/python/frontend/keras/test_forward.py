@@ -58,7 +58,7 @@ def verify_keras_frontend(keras_model, need_transpose=True):
     def to_channels_last(arr):
         return arr.transpose([0] + list(range(2, arr.ndim)) + [1])
 
-    xs = [np.random.uniform(size=shape, low=-1.0, high=1.0) for shape in in_shapes]
+    xs = [tvm.testing.random_data(shape, 'float32', -1.0, 1.0) for shape in in_shapes]
     keras_out = get_keras_output(xs)
     keras_out = keras_out if isinstance(keras_out, list) else [keras_out]
     for target, ctx in ctx_list():

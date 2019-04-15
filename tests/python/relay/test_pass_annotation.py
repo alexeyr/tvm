@@ -245,8 +245,8 @@ def run_fusible_network(dev, tgt):
     """
     x = relay.var("x", shape=(1, 10))
     y = relay.var("y", shape=(10, 10))
-    x_data = np.random.rand(1, 10).astype('float32')
-    y_data = np.random.rand(10, 10).astype('float32')
+    x_data = tvm.testing.random_data(shape=(11, 10), dtype='float32')
+    y_data = tvm.testing.random_data(shape=(10, 10), dtype='float32')
     tmp_add = x_data + y_data
     tmp_sqrt = np.sqrt(tmp_add)
     tmp_log = np.log(tmp_add)
@@ -436,10 +436,10 @@ def run_unpropagatable_graph(dev, tgt):
     b = relay.var("b", shape=(10, 10))
     c = relay.var("c", shape=(10, 10))
     d = relay.var("d", shape=(10, 10))
-    a_data = np.random.rand(10, 10).astype('float32')
-    b_data = np.random.rand(10, 10).astype('float32')
-    c_data = np.random.rand(10, 10).astype('float32')
-    d_data = np.random.rand(10, 10).astype('float32')
+    a_data = tvm.testing.random_data((10, 10), 'float32')
+    b_data = tvm.testing.random_data((10, 10), 'float32')
+    c_data = tvm.testing.random_data((10, 10), 'float32')
+    d_data = tvm.testing.random_data((10, 10), 'float32')
     tmp_add = a_data + b_data
     tmp_mul = np.multiply(c_data, d_data)
     ref_res = np.subtract(tmp_add, tmp_mul)
@@ -479,8 +479,7 @@ def run_unpropagatable_graph(dev, tgt):
     expected_index = [2, 2, 2, 1, 1, 1, 2, 2]
     check_annotated_graph(annotated_func, expected_func)
     params = {"a": a_data, "b": b_data, "c": c_data, "d": d_data}
-    config = {"opt_level": 0}
-    config["fallback_device"] = fallback_device
+    config = {"opt_level": 0, "fallback_device": fallback_device}
     with relay.build_config(**config):
         graph, lib, params = relay.build(annotated_func, target, params=params)
         contexts = [tvm.cpu(0), tvm.context(dev)]

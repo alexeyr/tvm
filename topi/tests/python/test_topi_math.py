@@ -39,7 +39,7 @@ def test_ewise():
         assert tuple(B.shape) == tuple(A.shape)
         if not skip_name_check:
             assert B.op.body[0].name == name
-        a_np = np.random.uniform(low=low, high=high, size=shape).astype(A.dtype) * 10
+        a_np = tvm.testing.random_data(shape, A.dtype, low, high) * 10
         # avoid round check too close to boundary
         if check_round:
             a_np += ((np.fmod(a_np, 1) - 0.5) < 1e-6) * 1e-5

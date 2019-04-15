@@ -30,9 +30,9 @@ def helper(symbol, inputs, params, update_func, run_times, target, ctx, dtype="f
     params_dict = {}
     for (name, shape, s) in inputs:
         ishapes.update({name: shape})
-        np_inputs.update({name: np.random.uniform(size=shape).astype(dtype)})
+        np_inputs.update({name: tvm.testing.random_data(shape, dtype)})
     for (name, shape, s) in params:
-        np_inputs.update({name: np.random.uniform(size=shape).astype(dtype)})
+        np_inputs.update({name: tvm.testing.random_data(shape, dtype)})
         params_dict.update({name: np_inputs[name]})
 
     graph, lib, rt_params = nnvm.compiler.build(symbol, target, shape=ishapes)

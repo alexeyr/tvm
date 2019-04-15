@@ -422,9 +422,9 @@ ctx = remote.ext_dev(0)
 
 # Initialize the A and B arrays randomly in the int range of (-128, 128]
 A_orig = np.random.randint(
-    -128, 128, size=(o * env.BATCH, n * env.BLOCK_IN)).astype(A.dtype)
+    -128, 128, size=(o * env.BATCH, n * env.BLOCK_IN), dtype=A.dtype)
 B_orig = np.random.randint(
-    -128, 128, size=(m * env.BLOCK_OUT, n * env.BLOCK_IN)).astype(B.dtype)
+    -128, 128, size=(m * env.BLOCK_OUT, n * env.BLOCK_IN), dtype=B.dtype)
 
 # Apply packing to the A and B arrays from a 2D to a 4D packed layout
 A_packed = A_orig.reshape(
@@ -435,7 +435,7 @@ B_packed = B_orig.reshape(
 # Format the input/output arrays with tvm.nd.array to the DLPack standard
 A_nd = tvm.nd.array(A_packed, ctx)
 B_nd = tvm.nd.array(B_packed, ctx)
-C_nd = tvm.nd.array(np.zeros((o, m, env.BATCH, env.BLOCK_OUT)).astype(C.dtype), ctx)
+C_nd = tvm.nd.array(np.zeros((o, m, env.BATCH, env.BLOCK_OUT), dtype=C.dtype), ctx)
 
 # Invoke the module to perform the computation
 f(A_nd, B_nd, C_nd)

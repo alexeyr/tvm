@@ -26,18 +26,18 @@ from common import get_all_backend
 def verify_bilinear_scale(batch, in_channel, in_height, in_width, out_height, out_width, layout='NCHW', align_corners=False):
 
     if layout == 'NCHW':
-        A = tvm.placeholder((batch, in_channel, in_height, in_width), name='A', dtype='float32')
-        dtype = A.dtype
+        in_shape = (batch, in_channel, in_height, in_width)
         out_shape = (batch, in_channel, out_height, out_width)
-        a_np = np.random.uniform(size=(batch, in_channel, in_height, in_width)).astype(dtype)
     elif layout == 'NHWC':
-        A = tvm.placeholder((batch, in_height, in_width, in_channel), name='A', dtype='float32')
-        dtype = A.dtype
+        in_shape = (batch, in_height, in_width, in_channel)
         out_shape = (batch, out_height, out_width, in_channel)
-        a_np = np.random.uniform(size=(batch, in_height, in_width, in_channel)).astype(dtype)
     else:
         raise NotImplementedError(
             'Layout not supported {} '.format(layout))
+
+    A = tvm.placeholder(in_shape, name='A', dtype='float32')
+    dtype = A.dtype
+    a_np = tvm.testing.random_data(in_shape, dtype, 0.0, 1.0)
 
     B = topi.image.resize(A, (out_height, out_width), layout=layout, align_corners=align_corners)
 
@@ -52,7 +52,7 @@ def verify_bilinear_scale(batch, in_channel, in_height, in_width, out_height, ou
         with tvm.target.create(device):
             s = topi.generic.schedule_injective(B)
         a = tvm.nd.array(a_np, ctx)
-        b = tvm.nd.array(np.zeros(out_shape, dtype=dtype), ctx)
+        b = tvm.nd.empty(out_shape, dtype, ctx)
         f = tvm.build(s, [A, B], device)
         f(a, b)
 

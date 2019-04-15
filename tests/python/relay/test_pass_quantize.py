@@ -25,7 +25,7 @@ def make_dataset(graph, size=100):
     args = relay.ir_pass.infer_type(graph).params
     def create_arr(var):
         ttype = var.type_annotation
-        np_arr = np.random.uniform(-1.0, 1.0, size=ttype.concrete_shape).astype(ttype.dtype)
+        np_arr = tvm.testing.random_data(ttype.concrete_shape, ttype.dtype, -1.0, 1.0)
         return tvm.ndarray.array(np_arr)
 
     params = {}

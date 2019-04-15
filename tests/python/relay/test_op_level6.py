@@ -29,7 +29,7 @@ def test_argsort():
         z = relay.argsort(x, axis=axis, is_ascend=is_ascend)
         zz = relay.ir_pass.infer_type(z)
         func = relay.Function([x], z)
-        x_data = np.random.uniform(size=shape).astype("float32")
+        x_data = tvm.testing.random_data(shape, "float32")
         if is_ascend:
             ref_res = np.argsort(x_data, axis=axis)
         else:

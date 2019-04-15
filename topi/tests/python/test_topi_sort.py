@@ -28,11 +28,10 @@ from topi import argsort
 
 def test_argsort():
     dshape = (1, 8)
-    valid_count_shape = (2,)
     data = tvm.placeholder(dshape, name="data", dtype="float32")
     valid_count = tvm.placeholder((dshape[0],), dtype="int32", name="valid_count")
-    np_data = np.random.rand(dshape[0], dshape[1]).astype(data.dtype)
-    np_valid_count = np.array([4]).astype(valid_count.dtype)
+    np_data = tvm.testing.random_data(dshape, data.dtype)
+    np_valid_count = np.array([4], dtype=valid_count.dtype)
     np_result = np.argsort(-np_data)
     def check_device(device):
         ctx = tvm.context(device, 0)

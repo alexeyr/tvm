@@ -24,8 +24,8 @@ def test_tsim(i):
     rmax = 64
     n = np.random.randint(rmin, rmax)
     ctx = tvm.cpu(0)
-    a = tvm.nd.array(np.random.randint(rmax, size=n).astype("uint64"), ctx)
-    b = tvm.nd.array(np.zeros(n).astype("uint64"), ctx)
+    a = tvm.nd.array(np.random.randint(rmax, size=n, dtype="uint64"), ctx)
+    b = tvm.nd.array(np.zeros(n, dtype="uint64"), ctx)
     tsim = load_tsim()
     f = load_driver()
     f(tsim, a, b)

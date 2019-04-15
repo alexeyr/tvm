@@ -47,7 +47,7 @@ def test_unary_op():
         assert relay.ir_pass.infer_type(y).checked_type == tp
 
         if ref is not None:
-            data = np.random.rand(*shape).astype(dtype)
+            data = tvm.testing.random_data(shape, dtype)
             ref_res = ref(data)
             func = relay.Function([x], y)
             for target, ctx in ctx_list():
@@ -92,8 +92,8 @@ def test_binary_op():
             x = relay.var("x", t1)
             y = relay.var("y", t2)
             z = opfunc(x, y)
-            x_data = np.random.rand(5, 10, 5).astype(t1.dtype)
-            y_data = np.random.rand(5, 10, 5).astype(t2.dtype)
+            x_data = tvm.testing.random_data(shape=(5, 10, 5), dtype=t1.dtype)
+            y_data = tvm.testing.random_data(shape=(5, 10, 5), dtype=t2.dtype)
             ref_res = ref(x_data, y_data)
             func = relay.Function([x, y], z)
 
@@ -117,7 +117,7 @@ def test_expand_dims():
         x = relay.Var("x", relay.TensorType(dshape, dtype))
         func = relay.Function([x], relay.expand_dims(x, axis, num_newaxis))
         for target, ctx in ctx_list():
-            data = np.random.uniform(size=dshape).astype(dtype)
+            data = tvm.testing.random_data(dshape, dtype)
             ref_res = data.reshape(oshape)
             intrp = relay.create_executor("graph", ctx=ctx, target=target)
             op_res = intrp.evaluate(func)(data)
@@ -139,8 +139,8 @@ def test_bias_add():
     assert zz.args[1].checked_type == relay.TensorType(bshape)
 
     func = relay.Function([x, bias], z)
-    x_data = np.random.uniform(size=xshape).astype(dtype)
-    y_data = np.random.uniform(size=bshape).astype(dtype)
+    x_data = tvm.testing.random_data(xshape, dtype)
+    y_data = tvm.testing.random_data(bshape, dtype)
     ref_res = x_data + y_data.reshape((2, 1, 1))
     for target, ctx in ctx_list():
         intrp = relay.create_executor("graph", ctx=ctx, target=target)
@@ -165,7 +165,7 @@ def test_softmax():
     yy = relay.ir_pass.infer_type(y)
     assert yy.checked_type == relay.TensorType(shape)
     func = relay.Function([x], y)
-    x_data = np.random.uniform(size=shape).astype("float32")
+    x_data = tvm.testing.random_data(shape, 'float32')
     ref_res = topi.testing.softmax_python(x_data)
     for target, ctx in ctx_list():
         intrp = relay.create_executor("graph", ctx=ctx, target=target)
@@ -181,7 +181,7 @@ def test_log_softmax():
     yy = relay.ir_pass.infer_type(y)
     assert yy.checked_type == relay.TensorType(shape)
     func = relay.Function([x], y)
-    x_data = np.random.uniform(size=shape).astype("float32")
+    x_data = tvm.testing.random_data(shape, 'float32')
     ref_res = topi.testing.log_softmax_python(x_data)
     for target, ctx in ctx_list():
         intrp = relay.create_executor("graph", ctx=ctx, target=target)
@@ -214,9 +214,9 @@ def test_concatenate():
     z = relay.add(z, t)
     # Check result.
     func = relay.Function([x, y, t], z)
-    x_data = np.random.rand(10, 5).astype('float32')
-    y_data = np.random.rand(10, 5).astype('float32')
-    t_data = np.random.uniform(size=()).astype('float32')
+    x_data = tvm.testing.random_data(shape=(10, 5), dtype='float32')
+    y_data = tvm.testing.random_data(shape=(10, 5), dtype='float32')
+    t_data = tvm.testing.random_data(shape=(), dtype='float32')
     ref_res = np.concatenate((x_data, y_data), axis=1) + t_data
 
     for target, ctx in ctx_list():
@@ -314,8 +314,8 @@ def test_dense():
 
     # Check result.
     func = relay.Function([x, w], z)
-    x_data = np.random.rand(10, 5).astype('float32')
-    w_data = np.random.rand(2, 5).astype('float32')
+    x_data = tvm.testing.random_data(shape=(10, 5), dtype='float32')
+    w_data = tvm.testing.random_data(shape=(2, 5), dtype='float32')
     ref_res = np.dot(x_data, w_data.T)
 
     for target, ctx in ctx_list():

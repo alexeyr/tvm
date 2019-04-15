@@ -101,8 +101,8 @@ def run_tvm_graph(coreml_model, target, ctx, input_data, input_name, output_shap
 def verify_AddLayerParams(input_dim, alpha=2):
     dtype = 'float32'
 
-    a_np1 = np.random.uniform(size=input_dim).astype(dtype)
-    a_np2 = np.random.uniform(size=input_dim).astype(dtype)
+    a_np1 = tvm.testing.random_data(input_dim, dtype)
+    a_np2 = tvm.testing.random_data(input_dim, dtype)
 
     b_np = np.add(a_np1, a_np2) + alpha
     inputs = [('input1', datatypes.Array(*input_dim)),
@@ -127,8 +127,8 @@ def test_forward_AddLayerParams():
 def verify_MultiplyLayerParams(input_dim, alpha):
     dtype = 'float32'
 
-    a_np1 = np.random.uniform(size=input_dim).astype(dtype)
-    a_np2 = np.random.uniform(size=input_dim).astype(dtype)
+    a_np1 = tvm.testing.random_data(input_dim, dtype)
+    a_np2 = tvm.testing.random_data(input_dim, dtype)
 
     b_np = np.multiply(a_np1, a_np2) * alpha
     inputs = [('input1', datatypes.Array(*input_dim)),
@@ -153,8 +153,8 @@ def test_forward_MultiplyLayerParams():
 def verify_ConcatLayerParams(input1_dim, input2_dim):
     dtype = 'float32'
 
-    a_np1 = np.random.uniform(size=input1_dim).astype(dtype)
-    a_np2 = np.random.uniform(size=input2_dim).astype(dtype)
+    a_np1 = tvm.testing.random_data(input1_dim, dtype)
+    a_np2 = tvm.testing.random_data(input2_dim, dtype)
 
     b_np = np.concatenate((a_np1, a_np2), axis=1)
     inputs = [('input1', datatypes.Array(*input1_dim)),
@@ -207,7 +207,7 @@ def test_forward_UpsampleLayerParams():
 def verify_l2_normalize(input_dim, eps):
     dtype = "float32"
 
-    a_np = np.random.uniform(size=input_dim).astype(dtype)
+    a_np = tvm.testing.random_data(input_dim, dtype)
     b_np = topi.testing.l2_normalize_python(a_np, eps, 1)
 
     input = [('input', datatypes.Array(*input_dim))]
@@ -226,7 +226,7 @@ def test_forward_l2_normalize():
 def verify_lrn(input_dim, size, bias, alpha, beta):
     dtype = "float32"
     axis=1
-    a_np = np.random.uniform(size=input_dim).astype(dtype)
+    a_np = tvm.testing.random_data(input_dim, dtype)
     b_np = topi.testing.lrn_python(a_np, size, axis, bias, alpha, beta)
 
     input = [('input', datatypes.Array(*input_dim))]
@@ -251,8 +251,8 @@ def test_forward_lrn():
 def verify_average(input_dim1, input_dim2, axis=0):
     dtype = 'float32'
 
-    a_np1 = np.random.uniform(size=input_dim1).astype(dtype)
-    a_np2 = np.random.uniform(size=input_dim2).astype(dtype)
+    a_np1 = tvm.testing.random_data(input_dim1, dtype)
+    a_np2 = tvm.testing.random_data(input_dim2, dtype)
 
     b_np = np.mean((a_np1, a_np2), axis=axis)
 
@@ -277,9 +277,9 @@ def test_forward_average():
 def verify_max(input_dim):
     dtype = 'float32'
 
-    a_np1 = np.random.uniform(size=input_dim).astype(dtype)
-    a_np2 = np.random.uniform(size=input_dim).astype(dtype)
-    a_np3 = np.random.uniform(size=input_dim).astype(dtype)
+    a_np1 = tvm.testing.random_data(input_dim, dtype)
+    a_np2 = tvm.testing.random_data(input_dim, dtype)
+    a_np3 = tvm.testing.random_data(input_dim, dtype)
 
     b_np = np.max((a_np1, a_np2, a_np3), axis=0)
 
@@ -305,9 +305,9 @@ def test_forward_max():
 def verify_min(input_dim):
     dtype = 'float32'
 
-    a_np1 = np.random.uniform(size=input_dim).astype(dtype)
-    a_np2 = np.random.uniform(size=input_dim).astype(dtype)
-    a_np3 = np.random.uniform(size=input_dim).astype(dtype)
+    a_np1 = tvm.testing.random_data(input_dim, dtype)
+    a_np2 = tvm.testing.random_data(input_dim, dtype)
+    a_np3 = tvm.testing.random_data(input_dim, dtype)
 
     b_np = np.min((a_np1, a_np2, a_np3), axis=0)
 

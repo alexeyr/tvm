@@ -168,13 +168,13 @@ def lstm():
         ctx = tvm.gpu(0) if target == "cuda" else tvm.cl(0)
         # launch the kernel.
         scan_h_np = np.zeros(
-            (num_step, batch_size, num_hidden)).astype("float32")
+            (num_step, batch_size, num_hidden), dtype="float32")
         scan_c_np = np.zeros(
-            (num_step, batch_size, num_hidden)).astype("float32")
-        Xi2h_np = np.random.normal(
-            size=(num_step, batch_size, 4, num_hidden)).astype("float32")
-        Wh2h_np = np.random.normal(
-            size=(4, num_hidden, num_hidden)).astype("float32")
+            (num_step, batch_size, num_hidden), dtype="float32")
+        Xi2h_np = tvm.testing.random_data(
+            (num_step, batch_size, 4, num_hidden), dtype="float32")
+        Wh2h_np = tvm.testing.random_data(
+            (4, num_hidden, num_hidden), dtype="float32")
         scan_h_a = tvm.nd.array(scan_h_np, ctx)
         scan_c_a = tvm.nd.array(scan_c_np, ctx)
         Xi2h_a = tvm.nd.array(Xi2h_np, ctx)

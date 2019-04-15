@@ -27,7 +27,7 @@ def verify_l2_normalize(ishape, eps, axis=None):
     B = topi.nn.l2_normalize(A, eps, axis)
     dtype = A.dtype
 
-    a_np = np.random.uniform(size=ishape).astype(dtype)
+    a_np = tvm.testing.random_data(ishape, dtype)
     b_np = topi.testing.l2_normalize_python(a_np, eps, axis)
 
     def check_device(device):

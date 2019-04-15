@@ -30,7 +30,7 @@ from topi.vision import ssd, non_max_suppression, get_valid_counts
 def verify_get_valid_counts(dshape, score_threshold):
     dtype = "float32"
     batch_size, num_anchor, elem_length = dshape
-    np_data = np.random.uniform(size=dshape).astype(dtype)
+    np_data = tvm.testing.random_data(dshape, dtype)
     np_out1 = np.zeros(shape=(batch_size,))
     np_out2 = np.zeros(shape=dshape).astype(dtype)
     for i in range(batch_size):
@@ -132,7 +132,7 @@ def verify_multibox_prior(dshape, sizes=(1,), ratios=(1,), steps=(-1, -1), offse
     data = tvm.placeholder(dshape, name="data")
 
     dtype = data.dtype
-    input_data = np.random.uniform(size=dshape).astype(dtype)
+    input_data = tvm.testing.random_data(dshape, dtype)
 
     in_height = data.shape[2].value
     in_width = data.shape[3].value
@@ -244,8 +244,8 @@ def verify_roi_align(batch, in_channel, in_size, num_roi, pooled_size, spatial_s
 
     @memoize("topi.tests.test_topi_vision.verify_roi_align")
     def get_ref_data():
-        a_np = np.random.uniform(size=a_shape).astype('float32')
-        rois_np = np.random.uniform(size=rois_shape).astype('float32') * in_size
+        a_np = tvm.testing.random_data(a_shape, 'float32')
+        rois_np = tvm.testing.random_data(rois_shape, 'float32') * in_size
         rois_np[:, 0] = np.random.randint(low = 0, high = batch, size = num_roi)
         b_np = topi.testing.roi_align_nchw_python(a_np, rois_np, pooled_size=pooled_size,
                                                   spatial_scale=spatial_scale,
@@ -293,8 +293,8 @@ def verify_roi_pool(batch, in_channel, in_size, num_roi, pooled_size, spatial_sc
 
     @memoize("topi.tests.test_topi_vision.verify_roi_pool")
     def get_ref_data():
-        a_np = np.random.uniform(size=a_shape).astype('float32')
-        rois_np = np.random.uniform(size=rois_shape).astype('float32') * in_size
+        a_np = tvm.testing.random_data(a_shape, 'float32')
+        rois_np = tvm.testing.random_data(rois_shape, 'float32') * in_size
         rois_np[:, 0] = np.random.randint(low = 0, high = batch, size = num_roi).astype('float32')
 
         b_np = topi.testing.roi_pool_nchw_python(a_np, rois_np, pooled_size=pooled_size,

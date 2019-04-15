@@ -50,7 +50,7 @@ def test_scan():
         # launch the kernel.
         n = 1024
         m = 10
-        a_np = np.random.uniform(size=(m, n)).astype(res.dtype)
+        a_np = tvm.testing.random_data(shape=(m, n), dtype=res.dtype)
         a = tvm.nd.array(a_np, ctx)
         b = tvm.nd.array(np.zeros((m, n), dtype=res.dtype), ctx)
         fscan(a, b)

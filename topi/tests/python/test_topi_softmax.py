@@ -47,7 +47,7 @@ def verify_softmax(m, n, dtype="float32"):
     s = tvm.create_schedule([B.op])
     tvm.lower(s, [A, B], simple_mode=True)
 
-    a_np = np.random.uniform(size=get_const_tuple(A.shape)).astype(A.dtype)
+    a_np = tvm.testing.random_data(get_const_tuple(A.shape), A.dtype)
     b_np = topi.testing.softmax_python(a_np)
 
     for device in ['cuda', 'opencl', 'metal', 'rocm', 'vulkan', 'nvptx']:
@@ -58,7 +58,7 @@ def verify_softmax_4d(shape, dtype="float32"):
     B = topi.nn.softmax(A, axis=1)
 
     _, c, h, w = shape
-    a_np = np.random.uniform(size=get_const_tuple(A.shape)).astype(A.dtype)
+    a_np = tvm.testing.random_data(get_const_tuple(A.shape), A.dtype)
     b_np = topi.testing.softmax_python(a_np.transpose(0, 2, 3, 1).reshape(h*w, c))
     b_np = b_np.reshape(1, h, w, c).transpose(0, 3, 1, 2)
 
@@ -77,7 +77,7 @@ def verify_log_softmax(m, n, dtype="float32"):
     # confirm lower works
     s = tvm.create_schedule([B.op])
     tvm.lower(s, [A, B], simple_mode=True)
-    a_np = np.random.uniform(size=get_const_tuple(A.shape)).astype(A.dtype)
+    a_np = tvm.testing.random_data(get_const_tuple(A.shape), A.dtype)
     b_np = topi.testing.log_softmax_python(a_np)
 
     for device in get_all_backend():

@@ -50,7 +50,7 @@ def test_exp():
         ctx = tvm.context(device, 0)
         # launch the kernel.
         n = 1024
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
         b = tvm.nd.array(np.zeros(n, dtype=B.dtype), ctx)
         fexp(a, b)
         tvm.testing.assert_allclose(
@@ -89,10 +89,10 @@ def test_multi_kernel():
         ctx = tvm.context(device, 0)
         # launch the kernel.
         n = 1024
-        a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=n).astype(B.dtype), ctx)
-        c = tvm.nd.array(np.random.uniform(size=n).astype(C.dtype), ctx)
-        d = tvm.nd.array(np.random.uniform(size=n).astype(D.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype), ctx)
+        c = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=C.dtype), ctx)
+        d = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=D.dtype), ctx)
         fadd(a, b, c, d)
         tvm.testing.assert_allclose(
             d.asnumpy(), a.asnumpy() * 2 + b.asnumpy(), rtol=1e-5)

@@ -45,12 +45,12 @@ def verify_pool(n, ic, ih, kh, sh, padding, pool_type, ceil_mode):
         assert bshape[3] == int(math.floor(float(ashape[3] - kw + pw * 2) / sw) + 1)
 
 
-    a_np = np.random.uniform(size=(n, ic, ih, iw)).astype(dtype)
-    pad_np = np.zeros(shape=(n, ic, ih+2*ph, iw+2*pw)).astype(dtype)
+    a_np = tvm.testing.random_data(shape=(n, ic, ih, iw), dtype=dtype)
+    pad_np = np.zeros(shape=(n, ic, ih+2*ph, iw+2*pw), dtype=dtype)
     no_zero = (range(n), range(ic), (range(ph, ih+ph)), (range(pw, iw+pw)))
     pad_np[np.ix_(*no_zero)] = a_np
     _, oc, oh, ow = get_const_tuple(B.shape)
-    b_np = np.zeros(shape=(n, oc, oh, ow)).astype(dtype)
+    b_np = np.zeros(shape=(n, oc, oh, ow), dtype=dtype)
 
     if pool_type == 'avg':
         for i in range(oh):
@@ -95,7 +95,7 @@ def verify_global_pool(n, c, h, w, pool_type):
     B = topi.nn.global_pool(A, pool_type=pool_type)
     B = topi.nn.relu(B)
 
-    a_np = np.random.uniform(size=get_const_tuple(A.shape)).astype(A.dtype)
+    a_np = tvm.testing.random_data(get_const_tuple(A.shape), A.dtype)
     if pool_type == 'avg':
         b_np = np.mean(a_np, axis=(2,3), keepdims=True)
     elif pool_type =='max':

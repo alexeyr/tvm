@@ -43,10 +43,9 @@ def verify_deformable_conv2d_nchw(batch, in_channel, in_size, num_filter, kernel
 
     @memoize("topi.tests.test_topi_deformable_conv2d_nchw.verify_deformable_conv2d_nchw")
     def get_ref_data():
-        a_np = np.random.uniform(size=a_shape).astype(dtype)
-        offset_np = np.random.randn(*offset_shape).astype(dtype)
-        w_np = np.random.uniform(size=w_shape).astype(dtype)
-        b_np = np.random.uniform(size=bias_shape).astype(dtype)
+        a_np = tvm.testing.random_data(a_shape, dtype)
+        offset_np = tvm.testing.random_data(offset_shape, dtype)
+        w_np = tvm.testing.random_data(w_shape, dtype)
         c_np = topi.testing.deformable_conv2d_nchw_python(a_np, offset_np, w_np, stride, padding,
                                                           dilation, deformable_groups, groups)
 

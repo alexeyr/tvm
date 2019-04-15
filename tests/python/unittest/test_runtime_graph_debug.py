@@ -62,7 +62,7 @@ def test_graph_simple():
         except ValueError:
             return
 
-        a = np.random.uniform(size=(n,)).astype(A.dtype)
+        a = tvm.testing.random_data(shape=n, dtype=A.dtype)
         mod.set_input(x=a)
 
         #verify dumproot created
@@ -125,7 +125,7 @@ def test_graph_simple():
         except ValueError:
             print("Skip because debug graph_runtime not enabled")
             return
-        a = np.random.uniform(size=(n,)).astype(A.dtype)
+        a = tvm.testing.random_data(shape=n, dtype=A.dtype)
         mod.run(x=tvm.nd.array(a, ctx))
         out = tvm.nd.empty((n,), ctx=ctx)
         out = mod.get_output(0, out)

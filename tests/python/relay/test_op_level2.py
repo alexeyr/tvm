@@ -99,8 +99,8 @@ def test_conv2d_run():
                             groups=groups,
                             **attrs)
         func = relay.Function([x, w], y)
-        data = np.random.uniform(-scale, scale, size=dshape).astype(dtype)
-        kernel = np.random.uniform(-scale, scale, size=kshape).astype(dtype)
+        data = tvm.testing.random_data(dshape, dtype, -scale, scale)
+        kernel = tvm.testing.random_data(kshape, dtype, -scale, scale)
         dkernel = topi.testing.dilate_python(kernel, (1, 1) + dilation)
         if fref is None:
             ref_res = topi.testing.conv2d_nchw_python(
@@ -199,8 +199,8 @@ def test_conv2d_transpose_run():
                                   padding=(1,1), output_padding=(2, 2))
     func = relay.Function([x, w], y)
     dtype = "float32"
-    data = np.random.uniform(size=dshape).astype(dtype)
-    kernel = np.random.uniform(size=kshape).astype(dtype)
+    data = tvm.testing.random_data(dshape, dtype)
+    kernel = tvm.testing.random_data(kshape, dtype)
     c_np = topi.testing.conv2d_transpose_nchw_python(
         data, kernel, 2, 1)
     d_np = np.zeros(shape=oshape)
@@ -241,7 +241,7 @@ def _test_pool2d(opfunc, reffunc):
     x = relay.var("x", shape=dshape)
     y = opfunc(x, pool_size=(2, 2), strides=(2, 2), padding=(0, 0))
     func = relay.Function([x], y)
-    data = np.random.uniform(size=dshape).astype(dtype)
+    data = tvm.testing.random_data(dshape, dtype)
     ref_res = reffunc(data.reshape(1,3,14,2,14,2), axis=(3,5))
     for target, ctx in ctx_list():
         intrp1 = relay.create_executor("graph", ctx=ctx, target=target)
@@ -267,7 +267,7 @@ def _test_global_pool2d(opfunc, reffunc):
     x = relay.var("x", shape=dshape)
     y = opfunc(x)
     func = relay.Function([x], y)
-    data = np.random.uniform(size=dshape).astype(dtype)
+    data = tvm.testing.random_data(dshape, dtype)
     ref_res = reffunc(data, axis=(2,3), keepdims=True)
     for target, ctx in ctx_list():
         intrp1 = relay.create_executor("graph", ctx=ctx, target=target)
@@ -298,11 +298,11 @@ def test_avg_pool2d_no_count_pad():
                             count_include_pad=False)
     func = relay.Function([x], y)
     dtype = "float32"
-    a_np = np.random.uniform(low=0.001, size=(n, ic, ih, iw)).astype(dtype)
-    pad_np = np.zeros(shape=(n, ic, ih+2*ph, iw+2*pw)).astype(dtype)
+    a_np = tvm.testing.random_data((n, ic, ih, iw), dtype, 0.001, 1.0)
+    pad_np = np.zeros(shape=(n, ic, ih+2*ph, iw+2*pw), dtype=dtype)
     no_zero = (range(n), range(ic), (range(ph, ih+ph)), (range(pw, iw+pw)))
     pad_np[np.ix_(*no_zero)] = a_np
-    b_np = np.zeros(shape=(n, oc, oh, ow)).astype(dtype)
+    b_np = np.zeros(shape=(n, oc, oh, ow), dtype=dtype)
     for i in range(oh):
         for j in range(ow):
             pad_count = np.sum(pad_np[:, :, i*sh:i*sh+kh, j*sw:j*sw+kw] > 0, axis=(2,3))
@@ -341,7 +341,7 @@ def test_flatten_infer_type():
     yy = relay.ir_pass.infer_type(z)
     assert yy.checked_type == relay.TensorType(o_shape, dtype)
     func = relay.Function([x], z)
-    x_data = np.random.uniform(low=-1, high=1, size=shape).astype(dtype)
+    x_data = tvm.testing.random_data(shape, dtype, -1, 1)
     ref_res = x_data.flatten().reshape(o_shape)
 
     for target, ctx in ctx_list():
@@ -374,7 +374,7 @@ def test_pad_run():
         x = relay.var("x", shape=dshape)
         y = relay.nn.pad(x, ((1, 1), (2, 2), (3, 3), (4, 4)))
         func = relay.Function([x], y)
-        data = np.random.uniform(size=dshape).astype(dtype)
+        data = tvm.testing.random_data(dshape, dtype)
         ref_res = np.pad(data, ((1, 1), (2, 2), (3, 3), (4, 4)), 'constant')
         for target, ctx in ctx_list():
             intrp1 = relay.create_executor("graph", ctx=ctx, target=target)
@@ -404,7 +404,7 @@ def test_lrn():
     yy = relay.ir_pass.infer_type(z)
     assert yy.checked_type == relay.TensorType(shape, dtype)
     func = relay.Function([x], z)
-    x_data = np.random.uniform(low=-1, high=1, size=shape).astype(dtype)
+    x_data = tvm.testing.random_data(shape, dtype, -1, 1)
     ref_res = topi.testing.lrn_python(x_data, size, axis, bias, alpha, beta)
 
     for target, ctx in ctx_list():
@@ -432,7 +432,7 @@ def test_l2_normalize():
     yy = relay.ir_pass.infer_type(z)
     assert yy.checked_type == relay.TensorType(shape, dtype)
     func = relay.Function([x], z)
-    x_data = np.random.uniform(low=-1, high=1, size=shape).astype(dtype)
+    x_data = tvm.testing.random_data(shape, dtype, -1, 1)
     ref_res = topi.testing.l2_normalize_python(x_data, eps, axis)
 
     for target, ctx in ctx_list():
@@ -457,7 +457,7 @@ def test_batch_flatten():
     x = relay.Var("x", t1)
     func = relay.Function([x], relay.nn.batch_flatten(x))
 
-    data = np.random.rand(5, 10, 5).astype(t1.dtype)
+    data = tvm.testing.random_data(shape=(5, 10, 5), dtype=t1.dtype)
     ref_res = batch_flatten(data)
     for target, ctx in ctx_list():
         intrp = relay.create_executor("graph", ctx=ctx, target=target)
@@ -483,7 +483,7 @@ def _test_upsampling(layout, method):
     x = relay.var("x", shape=dshape)
     y = relay.nn.upsampling(x, scale=scale, layout=layout, method=method)
     func = relay.Function([x], y)
-    data = np.random.uniform(size=dshape).astype(dtype)
+    data = tvm.testing.random_data(dshape, dtype)
     if method == "NEAREST_NEIGHBOR":
         ref = topi.testing.upsampling_python(data, scale, layout)
     else:

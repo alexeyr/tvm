@@ -27,18 +27,18 @@ def verify_upsampling(batch, in_channel, in_height, in_width, scale, layout='NCH
 
 
     if layout == 'NCHW':
-        A = tvm.placeholder((batch, in_channel, in_height, in_width), name='A')
-        dtype = A.dtype
+        in_shape = (batch, in_channel, in_height, in_width)
         out_shape = (batch, in_channel, in_height*scale, in_width*scale)
-        a_np = np.random.uniform(size=(batch, in_channel, in_height, in_width)).astype(dtype)
     elif layout == 'NHWC':
-        A = tvm.placeholder((batch, in_height, in_width, in_channel), name='A')
-        dtype = A.dtype
+        in_shape = (batch, in_height, in_width, in_channel)
         out_shape = (batch, in_height*scale, in_width*scale, in_channel)
-        a_np = np.random.uniform(size=(batch, in_height, in_width, in_channel)).astype(dtype)
     else:
         raise NotImplementedError(
             'Layout not supported {} '.format(layout))
+
+    A = tvm.placeholder(in_shape, name='A')
+    dtype = A.dtype
+    a_np = tvm.testing.random_data(in_shape, dtype, 0.0, 1.0)
 
     B = topi.nn.upsampling(A, scale, layout=layout, method=method)
 

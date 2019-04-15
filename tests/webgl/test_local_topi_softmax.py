@@ -33,7 +33,7 @@ def verify_softmax(m, n):
     s = tvm.create_schedule([B.op])
     tvm.lower(s, [A, B], simple_mode=True)
 
-    a_np = np.random.uniform(size=get_const_tuple(A.shape)).astype(A.dtype)
+    a_np = tvm.testing.random_data(get_const_tuple(A.shape), A.dtype)
     b_np = topi.testing.softmax_python(a_np)
 
     def check_device(device):
@@ -64,7 +64,7 @@ def verify_log_softmax(m, n):
     # confirm lower works
     s = tvm.create_schedule([B.op])
     tvm.lower(s, [A, B], simple_mode=True)
-    a_np = np.random.uniform(size=get_const_tuple(A.shape)).astype(A.dtype)
+    a_np = tvm.testing.random_data(get_const_tuple(A.shape), A.dtype)
     b_np = topi.testing.log_softmax_python(a_np)
 
     def check_device(device):

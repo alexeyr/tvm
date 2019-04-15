@@ -36,8 +36,8 @@ def test_local_multi_stage():
 
     ctx = tvm.opengl(0)
     n = 10
-    a = tvm.nd.array(np.random.uniform(size=(n,)).astype(A.dtype), ctx)
-    c = tvm.nd.array(np.random.uniform(size=(n,)).astype(B.dtype), ctx)
+    a = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=A.dtype), ctx)
+    c = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype), ctx)
     f(a, c)
 
     tvm.testing.assert_allclose(c.asnumpy(), (a.asnumpy() + 1) * 2)

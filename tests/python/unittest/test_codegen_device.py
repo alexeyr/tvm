@@ -63,8 +63,8 @@ def test_add_pipeline():
         f = mhost.entry_func
         # launch the kernel.
         n = 1027
-        a = tvm.nd.array(np.random.uniform(size=n).astype(Ab.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=()).astype(Bb.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=Ab.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=(), dtype=Bb.dtype), ctx)
         d = tvm.nd.array(np.zeros(n, dtype=Db.dtype), ctx)
         f(a, b, d)
         tvm.testing.assert_allclose(
@@ -87,8 +87,8 @@ def test_add_pipeline():
         f = mhost.entry_func
         # launch the kernel.
         n = 1027
-        a = tvm.nd.array(np.random.uniform(size=n).astype(Ab.dtype), ctx)
-        b = tvm.nd.array(np.random.uniform(size=()).astype(Bb.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=Ab.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=(), dtype=Bb.dtype), ctx)
         d = tvm.nd.array(np.zeros(n, dtype=Db.dtype), ctx)
         f(a, b, d)
         tvm.testing.assert_allclose(

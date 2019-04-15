@@ -36,9 +36,9 @@ def verify_dense(batch, in_dim, out_dim, use_bias=True):
     # use memoize to pickle the test data for next time use
     @memoize("topi.tests.test_topi_dense")
     def get_ref_data():
-        a_np = np.random.uniform(size=(batch, in_dim)).astype(dtype)
-        b_np = np.random.uniform(size=(out_dim, in_dim)).astype(dtype)
-        c_np = np.random.uniform(size=(out_dim,)).astype(dtype)
+        a_np = tvm.testing.random_data((batch, in_dim), dtype)
+        b_np = tvm.testing.random_data((out_dim, in_dim), dtype)
+        c_np = tvm.testing.random_data(out_dim, dtype)
         if use_bias:
             d_np = np.maximum(np.dot(a_np, b_np.T) + c_np, 0.0)
         else:

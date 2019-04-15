@@ -41,8 +41,8 @@ def verify_binary_dense(batch, in_dim, out_dim):
     @memoize("topi.tests.test_topi_binary_dense")
     def get_ref_data():
         # generate random matrix of +1 or -1 value
-        a_np = (np.random.randint(2, size=(batch, in_dim)) * 2 - 1).astype(dtype)
-        b_np = (np.random.randint(2, size=(out_dim, in_dim)) * 2 - 1).astype(dtype)
+        a_np = np.random.randint(2, size=(batch, in_dim), dtype=dtype) * 2 - 1
+        b_np = np.random.randint(2, size=(out_dim, in_dim), dtype=dtype) * 2 - 1
         c_np = np.dot(a_np, b_np.T)
         return a_np, b_np, c_np
 

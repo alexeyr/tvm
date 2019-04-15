@@ -32,7 +32,7 @@ def verify_reorg(batch, in_size, in_channel, stride):
     dtype = A.dtype
 
     def get_ref_data_reorg():
-        a_np = np.random.uniform(size=a_shape).astype(dtype)
+        a_np = tvm.testing.random_data(a_shape, dtype)
         b_np = topi.testing.reorg_python(a_np, stride)
         return a_np, b_np
 

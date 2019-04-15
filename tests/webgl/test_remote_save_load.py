@@ -85,7 +85,7 @@ def try_remote_save_load():
     fhost.import_module(fdev)
 
     print('running...')
-    a = tvm.nd.array(np.random.uniform(size=16).astype(A.dtype), ctx)
+    a = tvm.nd.array(tvm.testing.random_data(16, A.dtype), ctx)
     b = tvm.nd.array(np.zeros(16, dtype=A.dtype), ctx)
     c = tvm.nd.array(np.zeros(16, dtype=C.dtype), ctx)
     fhost(a, b, c)

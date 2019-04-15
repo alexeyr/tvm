@@ -77,7 +77,7 @@ def verify_mxnet_frontend_impl(mx_symbol,
         return out.asnumpy()
 
     # random input
-    x = np.random.uniform(size=data_shape)
+    x = tvm.testing.random_data(data_shape, dtype)
     if gluon_impl:
         gluon_out, gluon_sym = get_gluon_output(name, x)
         for target, ctx in ctx_list():
@@ -230,8 +230,8 @@ def test_forward_where():
     dtype = 'float32'
     mx_sym = mx.sym.where(cond, x, y)
     np_cond = np.array([[0, 1], [-1, 0]]).astype(dtype)
-    np_x = np.random.uniform(size=dshape).astype(dtype)
-    np_y = np.random.uniform(size=dshape).astype(dtype)
+    np_x = tvm.testing.random_data(dshape, dtype)
+    np_y = tvm.testing.random_data(dshape, dtype)
     mx_cond = mx.nd.array(np_cond)
     mx_x = mx.nd.array(np_x)
     mx_y = mx.nd.array(np_y)
@@ -295,12 +295,10 @@ def test_forward_broadcast_ops():
         b_shape = (4, 5)
         if op == "broadcast_mod":
             dtype = 'int32'
-            a_np = np.random.randint(1, 100, size=a_shape).astype(dtype)
-            b_np = np.random.randint(1, 100, size=b_shape).astype(dtype)
         else:
             dtype = 'float32'
-            a_np = np.random.uniform(size=a_shape).astype(dtype)
-            b_np = np.random.uniform(size=b_shape).astype(dtype)
+        a_np = tvm.testing.random_data(a_shape, dtype)
+        b_np = tvm.testing.random_data(b_shape, dtype)
         mx_sym = _mx_symbol(mx.sym, op, [mx.sym.var('a'), mx.sym.var('b')])
         ref_res = _mx_symbol(mx.nd, op, [mx.nd.array(a_np), mx.nd.array(b_np)])
         shapes = {'a': a_shape, 'b': b_shape}
@@ -316,8 +314,8 @@ def test_forward_elemwise_ops():
                "elemwise_div", "maximum", "minimum"]:
         shape = (3, 4, 5)
         dtype = 'float32'
-        a_np = np.random.uniform(size=shape).astype(dtype)
-        b_np = np.random.uniform(size=shape).astype(dtype)
+        a_np = tvm.testing.random_data(shape, dtype)
+        b_np = tvm.testing.random_data(shape, dtype)
         mx_sym = _mx_symbol(mx.sym, op, [mx.sym.var('a'), mx.sym.var('b')])
         ref_res = _mx_symbol(mx.nd, op, [mx.nd.array(a_np), mx.nd.array(b_np)])
         shapes = {'a': shape, 'b': shape}
@@ -334,7 +332,7 @@ def test_forward_scalar_ops():
                operator.ne, operator.gt, operator.ge]:
         dtype='float32'
         a_shape = (3, 4, 5)
-        a_np = np.random.uniform(size=a_shape).astype(dtype)
+        a_np = tvm.testing.random_data(a_shape, dtype)
         b_scalar = 2.3
         mx_sym = op(mx.sym.var('a'), b_scalar)
         ref_res = op(mx.nd.array(a_np), b_scalar)
@@ -348,7 +346,7 @@ def test_forward_scalar_ops():
     for op in ["maximum", "minimum"]:
         dtype='float32'
         a_shape = (3, 4, 5)
-        a_np = np.random.uniform(size=a_shape).astype(dtype)
+        a_np = tvm.testing.random_data(a_shape, dtype)
         b_scalar = 2.3
         mx_sym = _mx_symbol(mx.sym, op, [mx.sym.var('a'), b_scalar])
         ref_res = _mx_symbol(mx.nd, op, [mx.nd.array(a_np), b_scalar])
@@ -362,7 +360,7 @@ def test_forward_scalar_ops():
 
 def test_forward_slice_axis():
     def verify(shape, axis, begin, end):
-        data_np = np.random.uniform(size=shape).astype("float32")
+        data_np = tvm.testing.random_data(shape, 'float32')
         ref_res = mx.nd.slice_axis(mx.nd.array(data_np), axis, begin, end)
         mx_sym = mx.sym.slice_axis(mx.sym.var("data"), axis, begin, end)
         new_sym, _ = relay.frontend.from_mxnet(mx_sym, {"data": shape})
@@ -379,8 +377,8 @@ def test_forward_slice_axis():
 
 def test_forward_slice_like():
     def verify(x_shape, y_shape, axes):
-        x_np = np.random.uniform(size=x_shape).astype("float32")
-        y_np = np.random.uniform(size=y_shape).astype("float32")
+        x_np = tvm.testing.random_data(x_shape, 'float32')
+        y_np = tvm.testing.random_data(y_shape, 'float32')
         if axes is None:
             ref_res = mx.nd.slice_like(mx.nd.array(x_np), mx.nd.array(y_np))
             mx_sym = mx.sym.slice_like(mx.sym.var("x"), mx.sym.var("y"))
@@ -405,7 +403,7 @@ def test_forward_l2_normalize():
 
 def test_forward_shape_array():
     def verify(shape):
-        x_np = np.random.uniform(size=shape).astype("float32")
+        x_np = tvm.testing.random_data(shape, 'float32')
         ref_res = mx.nd.shape_array(mx.nd.array(x_np))
         mx_sym = mx.sym.shape_array(mx.sym.var("x"))
         new_sym, _ = relay.frontend.from_mxnet(mx_sym, {"x": shape})
@@ -420,7 +418,7 @@ def test_forward_shape_array():
 
 def test_forward_squeeze():
     def verify(shape, axis):
-        x_np = np.random.uniform(size=shape).astype("float32")
+        x_np = tvm.testing.random_data(shape, 'float32')
         if axis is None:
             ref_res = mx.nd.squeeze(mx.nd.array(x_np))
             mx_sym = mx.sym.squeeze(mx.sym.var("x"))
@@ -440,7 +438,7 @@ def test_forward_squeeze():
 
 def test_forward_broadcast_axis():
     def verify(shape, axis, size):
-        x_np = np.random.uniform(size=shape).astype("float32")
+        x_np = tvm.testing.random_data(shape, 'float32')
         ref_res = mx.nd.broadcast_axis(mx.nd.array(x_np), axis=axis, size=size)
         mx_sym = mx.sym.broadcast_axis(mx.sym.var("x"), axis=axis, size=size)
         new_sym, _ = relay.frontend.from_mxnet(mx_sym, {"x": shape})
@@ -472,8 +470,9 @@ def test_forward_full():
 def test_forward_embedding():
     def verify(data_shape, weight_shape):
         in_dim, out_dim = weight_shape
+        # intentionally generate floats equal to integers
         x_np = np.random.randint(0, weight_shape[0], size=data_shape).astype("float32")
-        w_np = np.random.uniform(size=weight_shape).astype("float32")
+        w_np = tvm.testing.random_data(weight_shape, 'float32')
         ref_res = mx.nd.Embedding(mx.nd.array(x_np), mx.nd.array(w_np),
                                   input_dim=in_dim, output_dim=out_dim)
         mx_sym = mx.sym.Embedding(mx.sym.var("x"), mx.sym.var("w"),
@@ -497,7 +496,7 @@ def test_forward_smooth_l1():
 
 def test_forward_take():
     def verify(shape, indices_src, axis, mode="clip"):
-        x_np = np.random.uniform(size=shape).astype("float32")
+        x_np = tvm.testing.random_data(shape, 'float32')
         indices_np = np.array(indices_src, dtype="float32")
         ref_res = mx.nd.take(mx.nd.array(x_np), mx.nd.array(indices_np), axis, mode)
         mx_sym = mx.sym.take(mx.sym.var("x"), mx.sym.var("y"), axis, mode)
@@ -517,7 +516,7 @@ def test_forward_take():
 
 def test_forward_gather_nd():
     def verify(xshape, yshape, y_data):
-        x_data = np.random.uniform(size=xshape).astype("float32")
+        x_data = tvm.testing.random_data(xshape, 'float32')
         ref_res = mx.nd.gather_nd(mx.nd.array(x_data), mx.nd.array(y_data))
         mx_sym = mx.sym.gather_nd(mx.sym.var("x_data"), mx.sym.var("y_data"))
         new_sym, _ = relay.frontend.from_mxnet(mx_sym, {"x_data": xshape, "y_data": yshape}, {"x_data": "float32", "y_data": "int32"})
@@ -547,13 +546,13 @@ def test_forward_rnn_layer():
         layer.initialize()
 
         dtype = "float32"
-        data_np = np.random.uniform(size=(seq_len, batch, input_size)).astype(dtype)
+        data_np = tvm.testing.random_data((seq_len, batch, input_size), dtype)
         states_np = []
         states_mx = []
         shape_dict = {'data0': data_np.shape}
         inputs = {'data0': data_np}
         for i in range(num_states):
-            s = np.random.uniform(size=(num_layers, batch, hidden_size)).astype(dtype)
+            s = tvm.testing.random_data((num_layers, batch, hidden_size), dtype)
             states_np.append(s)
             states_mx.append(mx.nd.array(s))
             shape_dict['data%s' % (i+1)] = s.shape

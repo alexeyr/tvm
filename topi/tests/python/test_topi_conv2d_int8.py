@@ -47,9 +47,9 @@ def verify_conv2d_NCHWc_int8(batch, in_channel, in_size, num_filter, kernel, str
 
     @memoize("topi.tests.test_topi_conv2d_int8.verify_conv2d_nchw")
     def get_ref_data():
-        a_np = np.random.randint(low=-128, high=127, size=a_shape).astype(dtype)
-        w_np = np.random.randint(low=-128, high=128, size=w_shape).astype(dtype)
-        b_np = np.random.uniform(size=bias_shape).astype(dtype)
+        a_np = np.random.randint(low=-128, high=127, size=a_shape, dtype=dtype)
+        w_np = np.random.randint(low=-128, high=128, size=w_shape, dtype=dtype)
+        b_np = tvm.testing.random_data(bias_shape, dtype)
         dw_np = topi.testing.dilate_python(w_np, (1, 1, dilation, dilation))
         c_np = topi.testing.conv2d_nchw_python(a_np, dw_np, stride, padding).astype(dtype)
 
@@ -59,7 +59,7 @@ def verify_conv2d_NCHWc_int8(batch, in_channel, in_size, num_filter, kernel, str
                 out_height, out_width)).transpose(0, 1, 3, 4, 2)
 
         if add_bias:
-            b_np = np.random.uniform(size=bias_shape).astype(dtype)
+            b_np = tvm.testing.random_data(bias_shape, dtype)
             c_np += b_np
         if add_relu:
             c_np = np.maximum(c_np, 0)

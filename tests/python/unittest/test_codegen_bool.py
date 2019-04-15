@@ -37,9 +37,9 @@ def test_cmp_load_store():
         # BUILD and invoke the kernel.
         f = tvm.build(s, [A, B, D], "llvm")
         ctx = tvm.cpu(0)
-        a_np = np.random.uniform(size=n).astype(A.dtype)
+        a_np = tvm.testing.random_data(n, A.dtype)
         a = tvm.nd.array(a_np, ctx)
-        b = tvm.nd.array(np.random.uniform(size=n).astype(B.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype), ctx)
         d = tvm.nd.array(np.zeros(n, dtype=D.dtype), ctx)
         f(a, b, d)
         np.testing.assert_equal(
@@ -55,9 +55,9 @@ def test_cmp_load_store():
             s[stage].bind(xo, tvm.thread_axis("blockIdx.x"))
             s[stage].bind(xi, tvm.thread_axis("threadIdx.x"))
         f = tvm.build(s, [A, B, D], device)
-        a_np = np.random.uniform(size=n).astype(A.dtype)
+        a_np = tvm.testing.random_data(n, A.dtype)
         a = tvm.nd.array(a_np, ctx)
-        b = tvm.nd.array(np.random.uniform(size=n).astype(B.dtype), ctx)
+        b = tvm.nd.array(tvm.testing.random_data(shape=n, dtype=B.dtype), ctx)
         d = tvm.nd.array(np.zeros(n, dtype=D.dtype), ctx)
         f(a, b, d)
         np.testing.assert_equal(

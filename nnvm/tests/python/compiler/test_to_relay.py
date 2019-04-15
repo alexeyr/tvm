@@ -34,7 +34,7 @@ def check_model(sym, shapes, dtypes, params):
     nnvm_rts = graph_runtime.create(graph_json, mod, tvm.cpu(0))
     inputs = {}
     for name in shapes:
-        np_array = np.random.rand(*shapes[name]).astype('float32')
+        np_array = tvm.testing.random_data(shapes[name], 'float32')
         inputs[name] = tvm.nd.array(np_array)
 
     nnvm_rts.set_input(**params)

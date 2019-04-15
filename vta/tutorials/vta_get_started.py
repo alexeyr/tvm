@@ -351,11 +351,11 @@ f = remote.load_module("vadd.o")
 # Get the remote device context
 ctx = remote.ext_dev(0)
 
-# Initialize the A and B arrays randomly in the int range of (-128, 128]
+# Initialize the A and B arrays randomly in the int range of [-128, 127]
 A_orig = np.random.randint(
-    -128, 128, size=(o * env.BATCH, m * env.BLOCK_OUT)).astype(A.dtype)
+    -128, 128, size=(o * env.BATCH, m * env.BLOCK_OUT), dtype=A.dtype)
 B_orig = np.random.randint(
-    -128, 128, size=(o * env.BATCH, m * env.BLOCK_OUT)).astype(B.dtype)
+    -128, 128, size=(o * env.BATCH, m * env.BLOCK_OUT), dtype=B.dtype)
 
 # Apply packing to the A and B arrays from a 2D to a 4D packed layout
 A_packed = A_orig.reshape(

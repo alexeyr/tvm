@@ -522,7 +522,7 @@ def test_forward_mobilenet_v1():
         "mobilenet_v1_1.0_224.tflite")
     with open(tflite_model_file, "rb") as f:
         tflite_model_buf = f.read()
-    data = np.random.uniform(size=(1, 224, 224, 3)).astype('float32')
+    data = tvm.testing.random_data(shape=(1, 224, 224, 3), dtype='float32', low=0.0, high=1.0)
     tvm_data = np.transpose(data, axes=(0, 3, 1, 2))
     tflite_output = run_tflite_graph(tflite_model_buf, data)
     tvm_output = run_tvm_graph(tflite_model_buf, tvm_data, 'input')
@@ -537,7 +537,7 @@ def test_forward_mobilenet_v2():
         "mobilenet_v2_1.0_224.tflite")
     with open(tflite_model_file, "rb") as f:
         tflite_model_buf = f.read()
-    data = np.random.uniform(size=(1, 224, 224, 3)).astype('float32')
+    data = tvm.testing.random_data(shape=(1, 224, 224, 3), dtype='float32', low=0.0, high=1.0)
     tvm_data = np.transpose(data, axes=(0, 3, 1, 2))
     tflite_output = run_tflite_graph(tflite_model_buf, data)
     tvm_output = run_tvm_graph(tflite_model_buf, tvm_data, 'input')
@@ -556,7 +556,7 @@ def test_forward_inception_v3_net():
         "inception_v3.tflite")
     with open(tflite_model_file, "rb") as f:
         tflite_model_buf = f.read()
-    data = np.random.uniform(size=(1, 299, 299, 3)).astype('float32')
+    data = tvm.testing.random_data(shape=(1, 299, 299, 3), dtype='float32', low=0.0, high=1.0)
     tvm_data = np.transpose(data, axes=(0, 3, 1, 2))
     tflite_output = run_tflite_graph(tflite_model_buf, data)
     tvm_output = run_tvm_graph(tflite_model_buf, tvm_data, 'input')
@@ -571,7 +571,7 @@ def test_forward_inception_v4_net():
         "inception_v4.tflite")
     with open(tflite_model_file, "rb") as f:
         tflite_model_buf = f.read()
-    data = np.random.uniform(size=(1, 299, 299, 3)).astype('float32')
+    data = tvm.testing.random_data((1, 299, 299, 3), np.float32)
     tvm_data = np.transpose(data, axes=(0, 3, 1, 2))
     tflite_output = run_tflite_graph(tflite_model_buf, data)
     tvm_output = run_tvm_graph(tflite_model_buf, tvm_data, 'input')

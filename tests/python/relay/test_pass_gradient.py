@@ -24,7 +24,7 @@ import numpy as np
 
 
 def rand(dtype='float32', *shape):
-    return tvm.nd.array(np.random.rand(*shape).astype(dtype))
+    return tvm.nd.array(tvm.testing.random_data(shape, dtype))
 
 
 def test_id():

@@ -79,8 +79,8 @@ def test_llvm_add_pipeline():
             farm = remote.load_module("myadd.o")
             ctx = remote.cpu(0)
             n = nn
-            a = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
-            b = tvm.nd.array(np.random.uniform(size=n).astype(A.dtype), ctx)
+            a = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
+            b = tvm.nd.array(tvm.testing.random_data(n, A.dtype), ctx)
             c = tvm.nd.array(np.zeros(n, dtype=C.dtype), ctx)
             farm(a, b, c)
             tvm.testing.assert_allclose(

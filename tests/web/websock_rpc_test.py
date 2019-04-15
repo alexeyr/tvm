@@ -54,7 +54,7 @@ def test_rpc_array():
         remote.upload(path_dso, "dev_lib.dso")
         data = remote.download("dev_lib.dso")
         f1 = remote.load_module("dev_lib.dso")
-        a = tvm.nd.array(np.random.uniform(size=1024).astype(A.dtype), ctx)
+        a = tvm.nd.array(tvm.testing.random_data(shape=1024, dtype=A.dtype), ctx)
         b = tvm.nd.array(np.zeros(1024, dtype=A.dtype), ctx)
         time_f = f1.time_evaluator(f1.entry_name, remote.cpu(0), number=10)
         cost = time_f(a, b).mean

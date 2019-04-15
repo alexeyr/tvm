@@ -26,7 +26,7 @@ def verify_lrn(shape, size, axis, bias, alpha, beta):
     B = topi.nn.lrn(A, size, axis, alpha, beta, bias)
     dtype = A.dtype
 
-    a_np = np.random.uniform(size=shape).astype(dtype)
+    a_np = tvm.testing.random_data(shape, dtype)
     b_np = topi.testing.lrn_python(a_np, size, axis, bias, alpha, beta)
 
     def check_device(device):

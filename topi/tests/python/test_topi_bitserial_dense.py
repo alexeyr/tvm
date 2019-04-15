@@ -25,7 +25,7 @@ from tvm.contrib.pickle_memoize import memoize
 def generate_quantized_np(shape, bits, out_dtype):
     min_val = 0
     max_val = 1 << bits
-    return np.random.randint(min_val, max_val, size=shape).astype(out_dtype)
+    return np.random.randint(min_val, max_val, size=shape, dtype=out_dtype)
 
 def verify_bitserial_dense(batch, in_dim, out_dim, activation_bits, weight_bits, unipolar):
     input_dtype = 'uint32'

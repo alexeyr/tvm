@@ -38,7 +38,7 @@ def test_unary_op():
         y = opfunc(x)
 
         if ref is not None:
-            data = np.random.rand(*shape).astype(dtype)
+            data = tvm.testing.random_data(shape, dtype)
             ref_grad = ref(data)
             fwd_func = relay.Function([x], y)
             bwd_func = infer_type(gradient(fwd_func))
@@ -68,8 +68,8 @@ def test_binary_op():
         y = relay.var("y", t)
         z = opfunc(x, y)
 
-        x_data = np.random.rand(*s).astype(t.dtype)
-        y_data = np.random.rand(*s).astype(t.dtype)
+        x_data = tvm.testing.random_data(shape=s, dtype=t.dtype)
+        y_data = tvm.testing.random_data(shape=s, dtype=t.dtype)
         ref_grad0, ref_grad1 = ref(x_data, y_data)
         fwd_func = relay.Function([x, y], z)
         bwd_func = infer_type(gradient(fwd_func))

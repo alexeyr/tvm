@@ -33,8 +33,8 @@ def test_compile():
         m = graph_runtime.create(graph, lib, tvm.cpu(0))
         # get member functions
         set_input, run, get_output = m["set_input"], m["run"], m["get_output"]
-        na = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
-        nb = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
+        na = tvm.nd.array(tvm.testing.random_data(shape, dtype))
+        nb = tvm.nd.array(tvm.testing.random_data(shape, dtype))
         # set inputs
         set_input("x", na)
         set_input("y", nb)
@@ -62,8 +62,8 @@ def test_run():
     z = sym.exp(y + x)
     shape = (10, 10)
     dtype = tvm.float32
-    nx = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
-    ny = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
+    nx = tvm.nd.array(tvm.testing.random_data(shape, dtype))
+    ny = tvm.nd.array(tvm.testing.random_data(shape, dtype))
     res = _run_graph(z, {"x": nx, "y": ny})
     tvm.testing.assert_allclose(
         res[0].asnumpy(), np.exp(nx.asnumpy() + ny.asnumpy()))
@@ -76,9 +76,9 @@ def test_precompute_prune():
     z = y + x + a
     shape = (10, 10)
     dtype = tvm.float32
-    nx = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
-    na = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
-    ny = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
+    nx = tvm.nd.array(tvm.testing.random_data(shape, dtype))
+    na = tvm.nd.array(tvm.testing.random_data(shape, dtype))
+    ny = tvm.nd.array(tvm.testing.random_data(shape, dtype))
     params = {"x": nx, "a": na}
     graph, lib, params = nnvm.compiler.build(
         z, "llvm", shape={"y": ny.shape}, params=params)
@@ -101,10 +101,7 @@ def test_dtypes():
     for dtype in ['float32', 'float64', 'int32', 'int16', 'int8', 'int64']:
         graph, lib, _ = nnvm.compiler.build(y, 'llvm', {"x": dshape}, dtype=dtype)
         m = graph_runtime.create(graph, lib, tvm.cpu())
-        if 'float' in dtype:
-          data = np.random.uniform(size=dshape).astype(dtype)
-        elif 'int' in dtype:
-          data = np.random.randint(-127, 127, dshape).astype(dtype)
+        data = tvm.testing.random_data(dshape, dtype)
         m.run(x=data)
         data = (data > 0) * data
         out = m.get_output(0, tvm.nd.empty(oshape, dtype))
@@ -116,8 +113,8 @@ def test_ndarray_output():
     z = x + y
     shape = (10, 10)
     dtype = tvm.float32
-    nx = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
-    ny = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
+    nx = tvm.nd.array(tvm.testing.random_data(shape, dtype))
+    ny = tvm.nd.array(tvm.testing.random_data(shape, dtype))
     params = {"x": nx, "ny": ny}
     graph, lib, params = nnvm.compiler.build(
         z, "llvm", shape={"y": ny.shape, "x": nx.shape}, params=params)
@@ -135,8 +132,8 @@ def test_ndarray_input():
     z = x + y
     shape = (10, 10)
     dtype = tvm.float32
-    nx = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
-    ny = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
+    nx = tvm.nd.array(tvm.testing.random_data(shape, dtype))
+    ny = tvm.nd.array(tvm.testing.random_data(shape, dtype))
     params = {"x": nx, "ny": ny}
     graph, lib, params = nnvm.compiler.build(
         z, "llvm", shape={"y": ny.shape, "x": nx.shape}, params=params)
@@ -159,7 +156,7 @@ def test_num_outputs():
     z = sym.split(x, indices_or_sections=5, axis=1)
     shape = (10, 10)
     dtype = tvm.float32
-    nx = tvm.nd.array(np.random.uniform(size=shape).astype(dtype))
+    nx = tvm.nd.array(tvm.testing.random_data(shape, dtype))
     params = {"x": nx}
     graph, lib, params = nnvm.compiler.build(
         z, "llvm", shape={"x": nx.shape}, params=params)

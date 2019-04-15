@@ -34,7 +34,7 @@ def verify_broadcast_to_ele(in_shape, out_shape, fbcast):
         with tvm.target.create(device):
             s = topi.generic.schedule_broadcast(B)
         foo = tvm.build(s, [A, B], device, name="broadcast_to")
-        data_npy = np.random.uniform(size=in_shape).astype(A.dtype)
+        data_npy = tvm.testing.random_data(in_shape, A.dtype)
         out_npy = np.broadcast_to(data_npy, out_shape)
         data_nd = tvm.nd.array(data_npy, ctx)
         out_nd = tvm.nd.array(np.empty(out_shape).astype(B.dtype), ctx)
@@ -71,27 +71,21 @@ def verify_broadcast_binary_ele(lhs_shape, rhs_shape,
             s = topi.generic.schedule_broadcast(C)
         foo = tvm.build(s, [A, B, C], device, name="broadcast_binary" + "_" + ftopi.__name__)
         if lhs_shape is None:
-            lhs_npy = float(np.random.uniform(low=lhs_min, high=lhs_max))
-            if dtype.startswith('int'):
-                lhs_npy = int(lhs_npy)
+            lhs_npy = tvm.testing.random_data(None, dtype, lhs_min, lhs_max)
             lhs_nd = lhs_npy
         else:
-            lhs_npy = np.random.uniform(low=lhs_min, high=lhs_max,
-                                        size=lhs_shape).astype(A.dtype)
+            lhs_npy = tvm.testing.random_data(lhs_shape, A.dtype, lhs_min, lhs_max)
             lhs_nd = tvm.nd.array(lhs_npy, ctx)
 
         if rhs_shape is None:
-            rhs_npy = float(np.random.uniform(low=rhs_min, high=rhs_max))
-            if dtype.startswith('int'):
-                rhs_npy = int(rhs_npy)
+            rhs_npy = tvm.testing.random_data(None, dtype, rhs_min, rhs_max)
             rhs_nd = rhs_npy
         else:
-            rhs_npy = np.random.uniform(low=rhs_min, high=rhs_max,
-                                        size=rhs_shape).astype(A.dtype)
+            rhs_npy = tvm.testing.random_data(rhs_shape, A.dtype, rhs_min, rhs_max)
             rhs_nd = tvm.nd.array(rhs_npy, ctx)
 
         out_npy = fnumpy(lhs_npy, rhs_npy)
-        out_nd = tvm.nd.array(np.empty(out_npy.shape).astype(C.dtype), ctx)
+        out_nd = tvm.nd.empty(out_npy.shape, C.dtype, ctx)
         foo(lhs_nd, rhs_nd, out_nd)
         tvm.testing.assert_allclose(out_nd.asnumpy(), out_npy, rtol=1E-4, atol=1E-4)
 

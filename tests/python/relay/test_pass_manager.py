@@ -102,7 +102,7 @@ class OptTester():
 
 
 def get_rand(shape, dtype='float32'):
-    return tvm.nd.array(np.random.rand(*shape).astype(dtype))
+    return tvm.nd.array(tvm.testing.random_data(shape, dtype))
 
 
 def check_func(func, ref_func):

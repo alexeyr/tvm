@@ -27,7 +27,7 @@ def verify_relu(m, n):
     A = tvm.placeholder((m, n), name='A')
     B = topi.nn.relu(A)
 
-    a_np = np.random.uniform(low=-1.0, high=1.0, size=get_const_tuple(A.shape)).astype(A.dtype)
+    a_np = tvm.testing.random_data(get_const_tuple(A.shape), A.dtype, -1.0, 1.0)
     b_np = a_np * (a_np > 0)
 
     def check_device(device):
@@ -54,7 +54,7 @@ def verify_leaky_relu(m, alpha):
     B = topi.nn.leaky_relu(A, alpha)
     s = tvm.create_schedule([B.op])
 
-    a_np = np.random.uniform(size=get_const_tuple(A.shape)).astype(A.dtype)
+    a_np = tvm.testing.random_data(get_const_tuple(A.shape), A.dtype)
     b_np = a_np * (a_np > 0) + a_np * (a_np < 0) * alpha
     ctx = tvm.cpu(0)
     a = tvm.nd.array(a_np, ctx)
@@ -67,8 +67,8 @@ def verify_leaky_relu(m, alpha):
 def verify_prelu(x, w, axis, weight_reshape):
     X = tvm.placeholder((x), name='X')
     W = tvm.placeholder((w), name='W')
-    x_np = np.random.uniform(low=-1.0, high=1.0, size=get_const_tuple(X.shape)).astype(X.dtype)
-    w_np = np.random.uniform(low=-1.0, high=1.0, size=get_const_tuple(W.shape)).astype(W.dtype)
+    x_np = tvm.testing.random_data(get_const_tuple(X.shape), X.dtype, -1.0, 1.0)
+    w_np = tvm.testing.random_data(get_const_tuple(W.shape), W.dtype, -1.0, 1.0)
 
     def _prelu_numpy(x, W):
         return (x < 0) * (x *W.reshape(weight_reshape)) + (x>=0) * x
